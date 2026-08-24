@@ -1,0 +1,8 @@
+{
+  "name": "dalily",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "ai": "^5.0.0"
+  }
+}
