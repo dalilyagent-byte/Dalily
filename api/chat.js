@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { generateText } from 'ai';
 
 const PROJECT_ID = 'dalily-15fbb';
 const CERTS_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
@@ -33,6 +34,21 @@ async function verifyFirebaseToken(token) {
   const valid = crypto.createVerify('RSA-SHA256').update(`${parts[0]}.${parts[1]}`).end().verify(cert, decodePart(parts[2]));
   if (!valid) throw new Error('invalid_signature');
   return payload;
+}
+
+async function fallbackReply(messages) {
+  try {
+    const result = await generateText({
+      model: 'openai/gpt-5.6-sol',
+      system: 'أنت دليلي، مدير أعمال رقمي وموظف جوكر لأبو بندر. تحدث بلهجة سعودية واضحة ومختصرة. ساعد في البحث والتخطيط وإدارة المشاريع وصياغة الرسائل والتقارير. لا تدّع تنفيذ إجراء خارجي لم تنفذه فعلاً. اطلب موافقة صريحة قبل الدفع أو الرسائل للعملاء أو العقود أو القرارات المالية والقانونية المهمة.',
+      messages: messages.map(message => ({
+        role: message.role === 'model' ? 'assistant' : 'user',
+        content: message.parts[0].text
+      }))
+    });
+    if (result.text?.trim()) return result.text.trim();
+  } catch {}
+  return 'أنا حاضر يا أبو بندر. محرك الذكاء الأساسي وصل حده مؤقتًا، لكن أقدر أواصل معك في ترتيب المهام والمشاريع والفرص. قل لي وش تبي نبدأ فيه.';
 }
 
 function withinRateLimit(uid) {
@@ -73,8 +89,7 @@ export default async function handler(req, res) {
     });
     const data = await response.json();
     if (!response.ok) {
-      const limited = response.status === 429;
-      return res.status(limited ? 429 : 502).json({ error: limited ? 'وصلنا حد الاستخدام مؤقتًا، حاول بعد قليل' : 'تعذر اتصال دليلي بالذكاء الاصطناعي' });
+      return res.status(200).json({ text: await fallbackReply(messages), fallback: true });
     }
     const text = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
     if (!text) return res.status(502).json({ error: 'لم يصل رد من دليلي' });
