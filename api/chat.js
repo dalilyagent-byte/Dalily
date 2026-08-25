@@ -51,6 +51,41 @@ async function fallbackReply(messages) {
   return 'أنا حاضر يا أبو بندر. محرك الذكاء الأساسي وصل حده مؤقتًا، لكن أقدر أواصل معك في ترتيب المهام والمشاريع والفرص. قل لي وش تبي نبدأ فيه.';
 }
 
+function detectAction(message) {
+  const q = String(message || '').trim().slice(0, 500);
+  let match = q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مهمة\s*[:：-]?\s*(.+)$/i);
+  if (match?.[1]) return { type: 'create_task', title: match[1].trim().slice(0, 180) };
+  match = q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مشروع\s*[:：-]?\s*(.+)$/i);
+  if (match?.[1]) return { type: 'create_project', name: match[1].trim().slice(0, 180) };
+  match = q.match(/^(?:أنجز|انجز|أكمل|اكمل|اقفل|أغلق|اغلق)\s+(?:مهمة\s+)?(.+)$/i);
+  if (match?.[1]) return { type: 'complete_task', query: match[1].trim().slice(0, 180) };
+  match = q.match(/^(?:احذف|الغ|ألغي|الغي)\s+(?:مهمة\s+)(.+)$/i);
+  if (match?.[1]) return { type: 'delete_task', query: match[1].trim().slice(0, 180) };
+  if (/تقرير.*(?:مدير|أعمال|اعمال)|ملخص.*(?:أعمال|اعمال)|وش وضعنا التنفيذي/i.test(q)) return { type: 'manager_report' };
+  if (/المهام/i.test(q) && /اعرض|ورني|وش|ما هي|ماهي|مهامي/i.test(q)) return { type: 'list_tasks' };
+  if (/المشاريع/i.test(q) && /اعرض|ورني|وش|ما هي|ماهي|مشاريعي/i.test(q)) return { type: 'list_projects' };
+  if (/(?:نسبة|تقدم|تقدّم|انجاز|إنجاز).*المشروع|وش وصلنا|وين وصلنا/i.test(q)) return { type: 'project_progress' };
+  if (/(?:المهمة|الخطوة).*التالية|وش بعد|وش التالي|التالي وش/i.test(q)) return { type: 'next_task' };
+  if (/(?:متوقف|واقف|ينتظر|قرار).*علي|وش يحتاج موافقتي|وش المطلوب مني/i.test(q)) return { type: 'owner_blockers' };
+  return null;
+}
+
+function actionReply(action) {
+  const replies = {
+    create_task: 'بسجّل المهمة في حسابك الآن.',
+    create_project: 'بسجّل المشروع في حسابك الآن.',
+    complete_task: 'ببحث عن المهمة وأعلّمها منجزة.',
+    delete_task: 'ببحث عن المهمة وأحذفها.',
+    list_tasks: 'بجيب لك مهامك الحالية من حسابك.',
+    list_projects: 'بجيب لك مشاريعك الحالية من حسابك.',
+    project_progress: 'براجع المشروع النشط وأحسب نسبة الإنجاز.',
+    next_task: 'بحدد لك أول مهمة غير منجزة في المشروع النشط.',
+    owner_blockers: 'براجع الأشياء المتوقفة على موافقتك.',
+    manager_report: 'بجهز لك تقرير مدير أعمال من بيانات حسابك.'
+  };
+  return replies[action.type] || 'بنّفذ الطلب داخل دليلي.';
+}
+
 function withinRateLimit(uid) {
   const now = Date.now();
   const item = rate.get(uid);
@@ -72,11 +107,20 @@ export default async function handler(req, res) {
     const user = await verifyFirebaseToken(token);
     if (!withinRateLimit(user.sub)) return res.status(429).json({ error: 'طلبات كثيرة، حاول بعد دقيقة' });
 
-    const input = Array.isArray(req.body?.messages) ? req.body.messages.slice(-12) : [];
+    const legacyMessage = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
+    const legacyHistory = Array.isArray(req.body?.history) ? req.body.history : [];
+    const input = Array.isArray(req.body?.messages)
+      ? req.body.messages.slice(-12)
+      : [...legacyHistory.map(item => ({ role: item.role === 'assistant' ? 'model' : 'user', text: item.content })), { role: 'user', text: legacyMessage }].slice(-12);
     const messages = input
-      .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.text === 'string')
+      .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.text === 'string' && m.text.trim())
       .map(m => ({ role: m.role, parts: [{ text: m.text.slice(0, 4000) }] }));
     if (!messages.length || messages.at(-1).role !== 'user') return res.status(400).json({ error: 'الرسالة غير صالحة' });
+    const action = detectAction(messages.at(-1).parts[0].text);
+    if (action) {
+      const text = actionReply(action);
+      return res.status(200).json({ text, reply: text, action, mode: 'action' });
+    }
 
     const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
       method: 'POST',
@@ -89,11 +133,12 @@ export default async function handler(req, res) {
     });
     const data = await response.json();
     if (!response.ok) {
-      return res.status(200).json({ text: await fallbackReply(messages), fallback: true });
+      const text = await fallbackReply(messages);
+      return res.status(200).json({ text, reply: text, fallback: true, mode: 'fallback' });
     }
     const text = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
     if (!text) return res.status(502).json({ error: 'لم يصل رد من دليلي' });
-    return res.status(200).json({ text });
+    return res.status(200).json({ text, reply: text, mode: 'ai' });
   } catch {
     return res.status(401).json({ error: 'انتهت جلسة الدخول، سجّل الدخول مرة ثانية' });
   }
