@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#f6f8fb">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="دليلي">
+<title>دليلي — محادثة مباشرة</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;height:100dvh;overflow:hidden;background:#f6f8fb;color:#10233f;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Tahoma,Arial,sans-serif}.app{height:100%;height:100dvh;max-width:760px;margin:auto;display:flex;flex-direction:column;background:#fff}.top{padding:max(12px,env(safe-area-inset-top)) 14px 10px;border-bottom:1px solid #e2e8f0;background:#fff;flex:none}.head{display:flex;align-items:center;justify-content:space-between;gap:10px}.identity{display:flex;align-items:center;gap:10px;min-width:0}.logo{width:42px;height:42px;border-radius:14px;background:#0d4d7f;color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}.titles{min-width:0}.titles strong{display:block;font-size:20px}.titles span{font-size:12px;color:#64748b}.state{font-size:12px;padding:7px 10px;border-radius:999px;background:#e7f6ef;color:#147a5a;white-space:nowrap}.toolbar{display:flex;gap:7px;margin-top:9px;overflow-x:auto;scrollbar-width:none}.toolbar::-webkit-scrollbar{display:none}.toolbar button,.toolbar a{flex:0 0 auto;border:1px solid #d9e2ec;background:#fff;color:#29445f;border-radius:12px;padding:8px 11px;font-size:12px;font-weight:700;text-decoration:none}.chat{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px;background:#f7f9fc;display:flex;flex-direction:column;gap:9px}.msg{max-width:88%;padding:11px 13px;border-radius:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px}.me{align-self:flex-start;background:#0d4d7f;color:#fff;border-bottom-left-radius:5px}.dalily{align-self:flex-end;background:#fff;border:1px solid #dfe7ef;color:#20364f;border-bottom-right-radius:5px}.system{background:#eef2f6;color:#5d6f82}.thinking{opacity:.65}.composer{flex:none;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:9px 12px calc(9px + env(safe-area-inset-bottom));border-top:1px solid #e2e8f0;background:#fff}.composer textarea{height:50px;min-height:50px;max-height:100px;resize:none;border:1px solid #ccd8e4;border-radius:15px;padding:13px;font:inherit;font-size:16px;color:#10233f;background:#fff;outline:none}.composer textarea:focus{border-color:#0d4d7f}.composer button{height:50px;min-width:66px;border:0;border-radius:15px;background:#0d4d7f;color:#fff;font-weight:900;font-size:15px}.composer button:disabled{opacity:.55}.loginbar{display:flex;align-items:center;gap:8px;margin-top:8px}.loginbar button{border:0;border-radius:10px;padding:7px 10px;font-weight:800}.login{background:#10233f;color:#fff}.logout{background:#eef2f6;color:#334155}.who{font-size:11px;color:#64748b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.welcome{margin:auto 0;text-align:center;color:#718096;padding:20px 16px}.welcome b{display:block;color:#20364f;font-size:18px;margin-bottom:6px}@media(min-width:761px){body{background:#e8eef5}.app{box-shadow:0 0 30px #0001}}
+</style>
+</head>
+<body>
+<main class="app">
+<header class="top">
+  <div class="head">
+    <div class="identity"><div class="logo">D</div><div class="titles"><strong>دليلي</strong><span>مدير أعمالك — محادثة مباشرة</span></div></div>
+    <div id="state" class="state">جاهز</div>
+  </div>
+  <div class="toolbar">
+    <button data-q="عطني تقرير مدير الأعمال">تقرير المدير</button>
+    <button data-q="وش المهمة التالية؟">المهمة التالية</button>
+    <button data-q="وش المطلوب مني؟">المطلوب مني</button>
+    <a href="/manager.html">لوحة الإدارة</a>
+    <a href="/">الأعمال</a>
+  </div>
+  <div class="loginbar">
+    <button id="login" class="login">دخول Google</button>
+    <button id="logout" class="logout" style="display:none">خروج</button>
+    <span id="who" class="who">سجّل الدخول مرة واحدة فقط</span>
+  </div>
+</header>
+<section id="chat" class="chat" aria-live="polite">
+  <div class="welcome"><b>هلا، أنا دليلي</b>اكتب لي مباشرة وش تبي أنجز أو أتابع لك.</div>
+</section>
+<form id="form" class="composer">
+  <textarea id="input" placeholder="اكتب لدليلي..." maxlength="4000" required></textarea>
+  <button id="send">إرسال</button>
+</form>
+</main>
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js';
+import{getAuth,GoogleAuthProvider,signInWithPopup,signOut,onAuthStateChanged}from'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
+const cfg={apiKey:'AIzaSyAJbfBSoquKOGBzmW8JzdtkuD97Nc10OYI',authDomain:'dalily-15fbb.firebaseapp.com',projectId:'dalily-15fbb',storageBucket:'dalily-15fbb.firebasestorage.app',messagingSenderId:'367242706687',appId:'1:367242706687:web:c94480475dff2385a496ca',measurementId:'G-1VT3HVTD3Y'};
+const app=initializeApp(cfg),auth=getAuth(app),provider=new GoogleAuthProvider(),$=id=>document.getElementById(id);let user=null,history=[];
+function add(role,text,extra=''){const welcome=document.querySelector('.welcome');if(welcome)welcome.remove();const d=document.createElement('div');d.className='msg '+(role==='user'?'me':'dalily')+(extra?' '+extra:'');d.textContent=text;$('chat').appendChild(d);$('chat').scrollTop=$('chat').scrollHeight;return d}
+onAuthStateChanged(auth,u=>{user=u;$('login').style.display=u?'none':'inline-block';$('logout').style.display=u?'inline-block':'none';$('who').textContent=u?(u.email||u.displayName||'تم تسجيل الدخول'):'سجّل الدخول مرة واحدة فقط';$('state').textContent=u?'متصل':'جاهز'});
+$('login').onclick=()=>signInWithPopup(auth,provider).catch(e=>add('assistant','تعذر تسجيل الدخول: '+e.message,'system'));
+$('logout').onclick=()=>signOut(auth);
+async function sendMessage(q){q=q.trim();if(!q)return;if(!user){add('assistant','سجّل الدخول بحساب Google أول مرة، وبعدها يبقى دخولك محفوظ غالبًا.','system');return;}add('user',q);history.push({role:'user',content:q});$('input').value='';$('send').disabled=true;$('state').textContent='يفكر...';const wait=add('assistant','دليلي يفكر...','thinking');try{const token=await user.getIdToken();const r=await fetch('/api/chat',{method:'POST',headers:{'content-type':'application/json','authorization':'Bearer '+token},body:JSON.stringify({message:q,history:history.slice(-12)})});const data=await r.json();wait.remove();if(!r.ok)throw new Error(data.error||'تعذر الاتصال');const text=data.reply||data.text||'تم استلام طلبك.';add('assistant',text);history.push({role:'assistant',content:text});$('state').textContent='متصل'}catch(e){wait.remove();add('assistant','صار تعثر: '+e.message,'system');$('state').textContent='تعذر الاتصال'}finally{$('send').disabled=false;$('input').focus()}}
+$('form').addEventListener('submit',e=>{e.preventDefault();sendMessage($('input').value)});
+document.querySelectorAll('[data-q]').forEach(b=>b.addEventListener('click',()=>sendMessage(b.dataset.q)));
+$('input').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('form').requestSubmit()}});
+</script>
+</body>
+</html>
