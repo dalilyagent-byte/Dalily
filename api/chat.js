@@ -1,5 +1,85 @@
-import { generateText } from 'ai';
-function cleanText(v,max=180){return String(v||'').trim().replace(/\s+/g,' ').slice(0,max)}
-function requestedAction(message,context={}){const q=cleanText(message,500);let m=q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مهمة\s*[:：-]?\s*(.+)$/i);if(m?.[1])return{type:'create_task',title:cleanText(m[1])};m=q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مشروع\s*[:：-]?\s*(.+)$/i);if(m?.[1])return{type:'create_project',name:cleanText(m[1])};m=q.match(/^(?:أنجز|انجز|أكمل|اكمل|اقفل|أغلق|اغلق)\s+(?:مهمة\s+)?(.+)$/i);if(m?.[1])return{type:'complete_task',query:cleanText(m[1])};m=q.match(/^(?:احذف|الغ|ألغي|الغي)\s+(?:مهمة\s+)(.+)$/i);if(m?.[1])return{type:'delete_task',query:cleanText(m[1])};if(/تقرير.*(?:مدير|أعمال|اعمال)|ملخص.*(?:أعمال|اعمال)|وش وضعنا التنفيذي/i.test(q))return{type:'manager_report'};if(/^(?:اعرض|ورني|وش|ما هي|ماهي).*المهام/i.test(q)||/مهامي(?:\s+الحالية)?$/i.test(q))return{type:'list_tasks'};if(/^(?:اعرض|ورني|وش|ما هي|ماهي).*المشاريع/i.test(q)||/مشاريعي(?:\s+الحالية)?$/i.test(q))return{type:'list_projects'};if(/(?:نسبة|تقدم|تقدّم|انجاز|إنجاز).*المشروع|وش وصلنا|وين وصلنا/i.test(q))return{type:'project_progress'};if(/(?:المهمة|الخطوة).*التالية|وش بعد|وش التالي|التالي وش/i.test(q))return{type:'next_task'};if(/(?:متوقف|واقف|ينتظر|قرار).*علي|وش يحتاج موافقتي|وش المطلوب مني/i.test(q))return{type:'owner_blockers'};if(/^(?:اعتمد|ابدأ|ابدا|نفذ)\s+(?:أفضل|افضل|الخطة|الفرصة)/i.test(q)){const p=context?.plan;if(p?.name)return{type:'start_opportunity',name:cleanText(p.name),opportunityId:cleanText(p.selectedOpportunityId||''),budget:Number(p.budget)||0,goal:cleanText(p.goal7Days||'',500),steps:Array.isArray(p.steps)?p.steps.slice(0,10).map((s,i)=>({title:cleanText(s?.title||`خطوة ${i+1}`),action:cleanText(s?.action||s?.task||'',500),day:Number(s?.day)||i+1})):[]};}return null}
-function localManagerReply(message,context={},action=null){const q=cleanText(message,1000),plan=context?.plan||null,opportunities=Array.isArray(context?.opportunities)?context.opportunities:[],lastDecision=context?.lastDecision||null,best=plan||[...opportunities].sort((a,b)=>(Number(b?.score)||0)-(Number(a?.score)||0))[0]||null;if(action){const map={create_task:'بسجّل المهمة في حسابك الآن.',create_project:'بسجّل المشروع في حسابك الآن.',complete_task:'ببحث عن المهمة وأعلّمها منجزة.',delete_task:'ببحث عن المهمة وأحذفها.',list_tasks:'بجيب لك مهامك الحالية من حسابك.',list_projects:'بجيب لك مشاريعك الحالية من حسابك.',project_progress:'براجع المشروع النشط والمهام المرتبطة فيه وأحسب نسبة الإنجاز.',next_task:'بحدد لك أول مهمة غير منجزة في المشروع النشط.',owner_blockers:'براجع الأشياء المتوقفة على موافقتك أو تدخلك.',manager_report:'بجهز لك تقرير مدير أعمال مختصر من بيانات حسابك الحالية.',start_opportunity:`باعتمد «${action.name}» كمشروع تنفيذي وأحوّل خطوات الخطة إلى مهام مرتبطة به.`};return map[action.type]||'بنّفذ الطلب داخل دليلي.'}if(/شراء|ادفع|دفع|حوّل|حول|تحويل|قرض|وقّع|وقع|عقد/.test(q))return'هذا إجراء مالي أو قانوني، لذلك ما أنفذه تلقائياً. أجهز لك القرار والخطوات، والتنفيذ الفعلي يحتاج موافقتك الصريحة وقناة تنفيذ مصرح بها.';if(/وضع|الحالة|أعمالنا|اعمالنا/.test(q)){const t=best?`أفضل فرصة حالياً «${best.name||'غير مسماة'}» بتقييم ${best.score||'—'}/100.`:'ما عندي فرصة مختارة حالياً.';return`وضع الأعمال الآن: ${t} عندنا ${opportunities.length} فرصة في سياق البحث. الأولوية اختبار الطلب بأقل مخاطرة.`}if(/الأولوية|الاولوية|اليوم|وش أسوي|وش اسوي/.test(q)){const s=Array.isArray(plan?.steps)&&plan.steps.length?(plan.steps[0]?.action||plan.steps[0]?.task||plan.steps[0]):null;return s?`أولوية اليوم: ${s}.`:'أولوية اليوم: نختار أعلى فرصة تقييماً وننفذ اختبار طلب صغير.'}if(/أفضل|افضل|فرصة|الفرص/.test(q)){if(!best)return'ما عندي بيانات كافية عن الفرص حالياً.';return`أفضل فرصة الآن «${best.name||'غير مسماة'}» بتقييم ${best.score||'—'}/100.${best.why?` السبب: ${best.why}`:''} تقدر تقول: «اعتمد أفضل فرصة» وأحوّلها إلى مشروع ومهام.`}if(/قرار|موافقة|موافق|اعتمد|اعتماد/.test(q)){if(lastDecision?.status==='approved')return'آخر قرار مسجل: موافق. التنفيذ المالي يظل متوقفاً حتى توجد قناة مصرح بها.';return'الدفع والتحويل والعقود والقروض تحتاج موافقتك. أما إدارة المهام والمشاريع فأقدر أنفذها داخل دليلي.'}return best?`أنا متابع الأعمال وأولوية العمل «${best.name||'أفضل فرصة'}». أقدر أحول الفرصة المختارة إلى مشروع ومهام، وأتابع التقدم والمهمة التالية.`:'أنا متابع معك. أقدر أنشئ وأعرض وأنجز المهام، وأتابع تقدم المشاريع.'}
-export default async function handler(req,res){if(req.method==='GET')return res.status(200).json({ok:true,service:'DALILY chat',mode:'executive-action-engine'});if(req.method!=='POST')return res.status(405).json({error:'Method not allowed'});const{message,history=[],context={}}=req.body||{};if(!message||typeof message!=='string')return res.status(400).json({error:'message is required'});const action=requestedAction(message,context);if(action)return res.status(200).json({reply:localManagerReply(message,context,action),action,model:'dalily-action-engine',mode:'action'});const safeHistory=Array.isArray(history)?history.slice(-10).map(m=>({role:m?.role==='assistant'?'assistant':'user',content:String(m?.content||'').slice(0,3000)})):[],plan=context?.plan||null,opportunities=Array.isArray(context?.opportunities)?context.opportunities.slice(0,10):[],lastDecision=context?.lastDecision||null;const system=`أنت "دليلي"، مدير أعمال رقمي تنفيذي. تحدث بالعربية السعودية الواضحة وباختصار عملي. حلل الفرص ورتب الأولويات وابنِ الخطط. لا تدّع تنفيذ شيء خارج الأنظمة المتصلة. الدفع والتحويل والشراء والعقود والقروض والالتزامات القانونية لا تُنفذ من المحادثة. استخدم السياق ولا تخترع أرقاماً.\nالخطة:${JSON.stringify(plan)}\nالفرص:${JSON.stringify(opportunities)}\nآخر قرار:${JSON.stringify(lastDecision)}`;try{const result=await generateText({model:'openai/gpt-5.6-sol',system,messages:[...safeHistory,{role:'user',content:message.slice(0,5000)}]});return res.status(200).json({reply:result.text,model:'openai/gpt-5.6-sol',mode:'ai'})}catch(error){console.error('DALILY AI unavailable; using local fallback',error?.message||error);return res.status(200).json({reply:localManagerReply(message,context),model:'dalily-local-manager',mode:'local-fallback'})}}
+import crypto from 'node:crypto';
+
+const PROJECT_ID = 'dalily-15fbb';
+const CERTS_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
+let certCache = { expires: 0, certs: null };
+const rate = new Map();
+
+function decodePart(value) {
+  const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
+  return Buffer.from(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='), 'base64');
+}
+
+async function getCerts() {
+  if (certCache.certs && Date.now() < certCache.expires) return certCache.certs;
+  const response = await fetch(CERTS_URL);
+  if (!response.ok) throw new Error('auth_certs_unavailable');
+  const maxAge = Number((response.headers.get('cache-control') || '').match(/max-age=(\d+)/)?.[1] || 3600);
+  certCache = { certs: await response.json(), expires: Date.now() + maxAge * 1000 };
+  return certCache.certs;
+}
+
+async function verifyFirebaseToken(token) {
+  const parts = token.split('.');
+  if (parts.length !== 3) throw new Error('invalid_token');
+  const header = JSON.parse(decodePart(parts[0]).toString('utf8'));
+  const payload = JSON.parse(decodePart(parts[1]).toString('utf8'));
+  const now = Math.floor(Date.now() / 1000);
+  if (header.alg !== 'RS256' || !header.kid) throw new Error('invalid_token');
+  if (payload.aud !== PROJECT_ID || payload.iss !== `https://securetoken.google.com/${PROJECT_ID}`) throw new Error('invalid_token');
+  if (!payload.sub || payload.exp <= now || payload.iat > now + 60) throw new Error('expired_token');
+  const cert = (await getCerts())[header.kid];
+  if (!cert) throw new Error('unknown_signing_key');
+  const valid = crypto.createVerify('RSA-SHA256').update(`${parts[0]}.${parts[1]}`).end().verify(cert, decodePart(parts[2]));
+  if (!valid) throw new Error('invalid_signature');
+  return payload;
+}
+
+function withinRateLimit(uid) {
+  const now = Date.now();
+  const item = rate.get(uid);
+  if (!item || now > item.reset) {
+    rate.set(uid, { count: 1, reset: now + 60_000 });
+    return true;
+  }
+  if (item.count >= 15) return false;
+  item.count += 1;
+  return true;
+}
+
+export default async function handler(req, res) {
+  res.setHeader('Cache-Control', 'no-store');
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  try {
+    if (!process.env.GEMINI_API_KEY) return res.status(503).json({ error: 'خدمة دليلي غير مهيأة بعد' });
+    const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+    const user = await verifyFirebaseToken(token);
+    if (!withinRateLimit(user.sub)) return res.status(429).json({ error: 'طلبات كثيرة، حاول بعد دقيقة' });
+
+    const input = Array.isArray(req.body?.messages) ? req.body.messages.slice(-12) : [];
+    const messages = input
+      .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.text === 'string')
+      .map(m => ({ role: m.role, parts: [{ text: m.text.slice(0, 4000) }] }));
+    if (!messages.length || messages.at(-1).role !== 'user') return res.status(400).json({ error: 'الرسالة غير صالحة' });
+
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: 'أنت دليلي، مدير أعمال رقمي وموظف جوكر لأبو بندر. تحدث بلهجة سعودية واضحة ومختصرة. ساعد في البحث والتخطيط وإدارة المشاريع وصياغة الرسائل والتقارير. لا تدّع تنفيذ إجراء خارجي لم تنفذه فعلاً. اطلب موافقة صريحة قبل الدفع أو الرسائل للعملاء أو العقود أو القرارات المالية والقانونية المهمة.' }] },
+        contents: messages,
+        generationConfig: { temperature: 0.35, maxOutputTokens: 1400 }
+      })
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      const limited = response.status === 429;
+      return res.status(limited ? 429 : 502).json({ error: limited ? 'وصلنا حد الاستخدام مؤقتًا، حاول بعد قليل' : 'تعذر اتصال دليلي بالذكاء الاصطناعي' });
+    }
+    const text = data.candidates?.[0]?.content?.parts?.map(part => part.text || '').join('').trim();
+    if (!text) return res.status(502).json({ error: 'لم يصل رد من دليلي' });
+    return res.status(200).json({ text });
+  } catch {
+    return res.status(401).json({ error: 'انتهت جلسة الدخول، سجّل الدخول مرة ثانية' });
+  }
+}
