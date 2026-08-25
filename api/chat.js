@@ -110,7 +110,7 @@ export default async function handler(req, res) {
     const legacyMessage = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     const legacyHistory = Array.isArray(req.body?.history) ? req.body.history : [];
     const input = Array.isArray(req.body?.messages)
-      ? req.body.messages.slice(-12)
+      ? req.body.messages.slice(-8)
       : [...legacyHistory.map(item => ({ role: item.role === 'assistant' ? 'model' : 'user', text: item.content })), { role: 'user', text: legacyMessage }].slice(-12);
     const messages = input
       .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.text === 'string' && m.text.trim())
@@ -122,15 +122,22 @@ export default async function handler(req, res) {
       return res.status(200).json({ text, reply: text, action, mode: 'action' });
     }
 
-    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent', {
+    let response;
+    try {
+      response = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: 'أنت دليلي، مدير أعمال رقمي وموظف جوكر لأبو بندر. تحدث بلهجة سعودية واضحة ومختصرة. ساعد في البحث والتخطيط وإدارة المشاريع وصياغة الرسائل والتقارير. لا تدّع تنفيذ إجراء خارجي لم تنفذه فعلاً. اطلب موافقة صريحة قبل الدفع أو الرسائل للعملاء أو العقود أو القرارات المالية والقانونية المهمة.' }] },
         contents: messages,
-        generationConfig: { temperature: 0.35, maxOutputTokens: 1400 }
-      })
-    });
+        generationConfig: { temperature: 0.3, maxOutputTokens: 700 }
+      }),
+      signal: AbortSignal.timeout(6500)
+      });
+    } catch {
+      const text = await fallbackReply(messages);
+      return res.status(200).json({ text, reply: text, fallback: true, mode: 'fallback' });
+    }
     const data = await response.json();
     if (!response.ok) {
       const text = await fallbackReply(messages);
