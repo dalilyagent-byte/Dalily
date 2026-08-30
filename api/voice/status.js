@@ -1,18 +1,22 @@
 export default function handler(req, res) {
-  const configured = Boolean(process.env.WAVE_API_KEY && process.env.WAVE_CALLER_ID);
+  const sandboxReady = Boolean(process.env.WAVE_API_KEY);
+  const productionReady = Boolean(process.env.WAVE_API_KEY && process.env.WAVE_CALLER_ID && process.env.WAVE_FLOW);
+
   return res.status(200).json({
     ok: true,
     service: 'DALILY Voice',
     provider: 'wave',
-    configured,
+    mode: productionReady ? 'production-ready-config' : 'sandbox-callback',
+    configured: sandboxReady,
     capabilities: {
-      outboundCalls: configured,
+      outboundCalls: sandboxReady,
       callStatusWebhook: true,
       language: 'ar-SA',
-      aiConversation: Boolean(process.env.WAVE_FLOW)
+      aiConversation: false
     },
-    next: configured
-      ? (process.env.WAVE_FLOW ? 'ready for Wave outbound calls' : 'set WAVE_FLOW for Dalily conversational flow')
-      : 'add WAVE_API_KEY and WAVE_CALLER_ID as server environment variables'
+    limits: productionReady
+      ? ['Wave conversational voice API is not documented/available in the current public API docs yet']
+      : ['Sandbox callback only', 'Calls are limited by Wave sandbox rules', 'Live AI conversation is not available in the documented sandbox API'],
+    next: 'Enable Wave conversational voice support when Wave publishes the required production/AI call-flow API'
   });
 }
