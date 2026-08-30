@@ -8,7 +8,6 @@ function decodePart(value) {
   const normalized = value.replace(/-/g, '+').replace(/_/g, '/');
   return Buffer.from(normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '='), 'base64');
 }
-
 async function getCerts() {
   if (certCache.certs && Date.now() < certCache.expires) return certCache.certs;
   const response = await fetch(CERTS_URL);
@@ -17,7 +16,6 @@ async function getCerts() {
   certCache = { certs: await response.json(), expires: Date.now() + maxAge * 1000 };
   return certCache.certs;
 }
-
 async function verifyFirebaseToken(token) {
   const parts = token.split('.');
   if (parts.length !== 3) throw new Error('invalid_token');
@@ -33,7 +31,6 @@ async function verifyFirebaseToken(token) {
   if (!valid) throw new Error('invalid_signature');
   return payload;
 }
-
 function normalizeSaudiNumber(value) {
   const raw = String(value || '').replace(/[\s()-]/g, '');
   if (/^05\d{8}$/.test(raw)) return `+966${raw.slice(1)}`;
@@ -45,63 +42,35 @@ function normalizeSaudiNumber(value) {
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
   try {
     const token = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-    const user = await verifyFirebaseToken(token);
-
+    await verifyFirebaseToken(token);
     const apiKey = process.env.WAVE_API_KEY;
-    const callerId = process.env.WAVE_CALLER_ID;
-    const flow = process.env.WAVE_FLOW || 'dalily_main';
-    if (!apiKey || !callerId) {
-      return res.status(503).json({ error: 'خدمة الاتصال غير مهيأة بعد', code: 'wave_not_configured' });
-    }
-
+    if (!apiKey) return res.status(503).json({ error: 'خدمة الاتصال غير مهيأة بعد', code: 'wave_not_configured' });
     const to = normalizeSaudiNumber(req.body?.to);
     if (!to) return res.status(400).json({ error: 'رقم الجوال السعودي غير صحيح' });
-
-    const webhook = process.env.WAVE_WEBHOOK_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/voice/webhook`;
-    const purpose = String(req.body?.purpose || '').trim().slice(0, 500);
-
+    const payload = {
+      to,
+      language: 'ar-SA',
+      webhook: process.env.WAVE_WEBHOOK_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/voice/webhook`
+    };
+    if (process.env.WAVE_CALLER_ID) payload.from = process.env.WAVE_CALLER_ID;
+    if (process.env.WAVE_FLOW) payload.flow = process.env.WAVE_FLOW;
     const response = await fetch('https://api.wave.sa/v1/calls', {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        to,
-        from: callerId,
-        flow,
-        language: 'ar-SA',
-        webhook,
-        metadata: {
-          source: 'dalily',
-          requestedBy: user.sub,
-          purpose
-        }
-      }),
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
       signal: AbortSignal.timeout(10000)
     });
-
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       console.error('Wave call failed', response.status, data);
-      return res.status(502).json({ error: 'تعذر بدء المكالمة عبر Wave', providerStatus: response.status });
+      return res.status(502).json({ error: data?.message || data?.error || 'تعذر بدء المكالمة عبر Wave', providerStatus: response.status });
     }
-
-    return res.status(202).json({
-      ok: true,
-      provider: 'wave',
-      callId: data.id || null,
-      status: data.status || 'queued',
-      to
-    });
+    return res.status(202).json({ ok: true, provider: 'wave', callId: data.id || null, status: data.status || 'queued', to });
   } catch (error) {
     console.error('Dalily voice call failure', error?.message || String(error));
-    if (/token|signature|expired|auth_/.test(error?.message || '')) {
-      return res.status(401).json({ error: 'انتهت جلسة الدخول، سجّل الدخول مرة ثانية' });
-    }
+    if (/token|signature|expired|auth_/.test(error?.message || '')) return res.status(401).json({ error: 'انتهت جلسة الدخول، سجّل الدخول مرة ثانية' });
     return res.status(500).json({ error: 'تعذر تشغيل الاتصال الآن' });
   }
 }

@@ -38,24 +38,49 @@ async function verifyFirebaseToken(token) {
   return payload;
 }
 
+function normalizeSaudiNumber(value) {
+  const raw = String(value || '').replace(/[\s()-]/g, '');
+  if (/^05\d{8}$/.test(raw)) return `+966${raw.slice(1)}`;
+  if (/^9665\d{8}$/.test(raw)) return `+${raw}`;
+  if (/^\+9665\d{8}$/.test(raw)) return raw;
+  return null;
+}
+
+async function startWaveCall(to, host) {
+  const apiKey = process.env.WAVE_API_KEY;
+  if (!apiKey) return { ok: false, status: 503, error: 'مفتاح Wave غير مهيأ في دليلي' };
+
+  const payload = {
+    to,
+    language: 'ar-SA',
+    webhook: process.env.WAVE_WEBHOOK_URL || `https://${host}/api/voice/webhook`
+  };
+  if (process.env.WAVE_CALLER_ID) payload.from = process.env.WAVE_CALLER_ID;
+  if (process.env.WAVE_FLOW) payload.flow = process.env.WAVE_FLOW;
+
+  const response = await fetch('https://api.wave.sa/v1/calls', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+    signal: AbortSignal.timeout(10000)
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    console.error('Wave chat call failed', response.status, data);
+    return { ok: false, status: response.status, error: data?.message || data?.error || 'Wave رفض بدء المكالمة' };
+  }
+  return { ok: true, id: data.id || null, status: data.status || 'queued' };
+}
+
 function toGatewayMessages(messages) {
-  return messages.map(message => ({
-    role: message.role === 'model' ? 'assistant' : 'user',
-    content: message.parts[0].text
-  }));
+  return messages.map(message => ({ role: message.role === 'model' ? 'assistant' : 'user', content: message.parts[0].text }));
 }
 
 async function gatewayReply(messages) {
   const models = ['openai/gpt-4.1-mini', 'openai/gpt-4o-mini'];
   for (const model of models) {
     try {
-      const result = await generateText({
-        model,
-        system: SYSTEM_PROMPT,
-        messages: toGatewayMessages(messages),
-        maxOutputTokens: 500,
-        temperature: 0.3
-      });
+      const result = await generateText({ model, system: SYSTEM_PROMPT, messages: toGatewayMessages(messages), maxOutputTokens: 500, temperature: 0.3 });
       if (result.text?.trim()) return { text: result.text.trim(), model };
     } catch (error) {
       console.error('Dalily gateway failure', model, error?.message || String(error));
@@ -71,11 +96,7 @@ async function geminiReply(messages) {
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-goog-api-key': process.env.GEMINI_API_KEY },
-        body: JSON.stringify({
-          systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
-          contents: messages,
-          generationConfig: { temperature: 0.3, maxOutputTokens: 500 }
-        }),
+        body: JSON.stringify({ systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] }, contents: messages, generationConfig: { temperature: 0.3, maxOutputTokens: 500 } }),
         signal: AbortSignal.timeout(6500)
       });
       const data = await response.json().catch(() => ({}));
@@ -93,7 +114,9 @@ async function geminiReply(messages) {
 
 function detectAction(message) {
   const q = String(message || '').trim().slice(0, 500);
-  let match = q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مهمة\s*[:：-]?\s*(.+)$/i);
+  let match = q.match(/^(?:دليلي\s+)?(?:اتصل|اتّصل|كلم|كلّم)\s+(?:على\s+)?(\+?9665\d{8}|05\d{8})(?:\s+(?:وقل|وقله|وقل له|بخصوص)\s+(.+))?$/i);
+  if (match?.[1]) return { type: 'make_call', to: normalizeSaudiNumber(match[1]), purpose: (match[2] || '').trim().slice(0, 300) };
+  match = q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مهمة\s*[:：-]?\s*(.+)$/i);
   if (match?.[1]) return { type: 'create_task', title: match[1].trim().slice(0, 180) };
   match = q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مشروع\s*[:：-]?\s*(.+)$/i);
   if (match?.[1]) return { type: 'create_project', name: match[1].trim().slice(0, 180) };
@@ -112,16 +135,7 @@ function detectAction(message) {
 
 function actionReply(action) {
   const replies = {
-    create_task: 'بسجّل المهمة في حسابك الآن.',
-    create_project: 'بسجّل المشروع في حسابك الآن.',
-    complete_task: 'ببحث عن المهمة وأعلّمها منجزة.',
-    delete_task: 'ببحث عن المهمة وأحذفها.',
-    list_tasks: 'بجيب لك مهامك الحالية من حسابك.',
-    list_projects: 'بجيب لك مشاريعك الحالية من حسابك.',
-    project_progress: 'براجع المشروع النشط وأحسب نسبة الإنجاز.',
-    next_task: 'بحدد لك أول مهمة غير منجزة في المشروع النشط.',
-    owner_blockers: 'براجع الأشياء المتوقفة على موافقتك.',
-    manager_report: 'بجهز لك تقرير مدير أعمال من بيانات حسابك.'
+    create_task: 'بسجّل المهمة في حسابك الآن.', create_project: 'بسجّل المشروع في حسابك الآن.', complete_task: 'ببحث عن المهمة وأعلّمها منجزة.', delete_task: 'ببحث عن المهمة وأحذفها.', list_tasks: 'بجيب لك مهامك الحالية من حسابك.', list_projects: 'بجيب لك مشاريعك الحالية من حسابك.', project_progress: 'براجع المشروع النشط وأحسب نسبة الإنجاز.', next_task: 'بحدد لك أول مهمة غير منجزة في المشروع النشط.', owner_blockers: 'براجع الأشياء المتوقفة على موافقتك.', manager_report: 'بجهز لك تقرير مدير أعمال من بيانات حسابك.'
   };
   return replies[action.type] || 'بنّفذ الطلب داخل دليلي.';
 }
@@ -129,10 +143,7 @@ function actionReply(action) {
 function withinRateLimit(uid) {
   const now = Date.now();
   const item = rate.get(uid);
-  if (!item || now > item.reset) {
-    rate.set(uid, { count: 1, reset: now + 60_000 });
-    return true;
-  }
+  if (!item || now > item.reset) { rate.set(uid, { count: 1, reset: now + 60_000 }); return true; }
   if (item.count >= 15) return false;
   item.count += 1;
   return true;
@@ -149,16 +160,21 @@ export default async function handler(req, res) {
 
     const legacyMessage = typeof req.body?.message === 'string' ? req.body.message.trim() : '';
     const legacyHistory = Array.isArray(req.body?.history) ? req.body.history : [];
-    const input = Array.isArray(req.body?.messages)
-      ? req.body.messages.slice(-8)
-      : [...legacyHistory.map(item => ({ role: item.role === 'assistant' ? 'model' : 'user', text: item.content })), { role: 'user', text: legacyMessage }].slice(-12);
-    const messages = input
-      .filter(m => (m.role === 'user' || m.role === 'model') && typeof m.text === 'string' && m.text.trim())
-      .map(m => ({ role: m.role, parts: [{ text: m.text.slice(0, 4000) }] }));
-
+    const input = Array.isArray(req.body?.messages) ? req.body.messages.slice(-8) : [...legacyHistory.map(item => ({ role: item.role === 'assistant' ? 'model' : 'user', text: item.content })), { role: 'user', text: legacyMessage }].slice(-12);
+    const messages = input.filter(m => (m.role === 'user' || m.role === 'model') && typeof m.text === 'string' && m.text.trim()).map(m => ({ role: m.role, parts: [{ text: m.text.slice(0, 4000) }] }));
     if (!messages.length || messages.at(-1).role !== 'user') return res.status(400).json({ error: 'الرسالة غير صالحة' });
 
     const action = detectAction(messages.at(-1).parts[0].text);
+    if (action?.type === 'make_call') {
+      if (!action.to) return res.status(400).json({ error: 'رقم الجوال السعودي غير صحيح' });
+      const call = await startWaveCall(action.to, req.headers.host);
+      if (!call.ok) {
+        const text = call.status === 401 || call.status === 403 ? 'Wave رفض المكالمة. مفتاح أو صلاحيات البيئة الحالية تحتاج مراجعة.' : `ما قدرت أبدأ المكالمة الآن: ${call.error}`;
+        return res.status(200).json({ text, reply: text, mode: 'voice-error', provider: 'wave', providerStatus: call.status });
+      }
+      const text = `تم إرسال طلب الاتصال إلى ${action.to} عبر Wave${call.id ? ` — رقم المكالمة ${call.id}` : ''}.`;
+      return res.status(200).json({ text, reply: text, mode: 'voice', provider: 'wave', callId: call.id, status: call.status, to: action.to });
+    }
     if (action) {
       const text = actionReply(action);
       return res.status(200).json({ text, reply: text, action, mode: 'action' });
@@ -166,10 +182,8 @@ export default async function handler(req, res) {
 
     const gemini = await geminiReply(messages);
     if (gemini) return res.status(200).json({ text: gemini.text, reply: gemini.text, mode: 'ai', provider: 'gemini', model: gemini.model });
-
     const gateway = await gatewayReply(messages);
     if (gateway) return res.status(200).json({ text: gateway.text, reply: gateway.text, mode: 'ai-fallback', provider: 'gateway', model: gateway.model });
-
     return res.status(503).json({ error: 'تعذر الوصول لمحرك دليلي الآن. حاول مرة ثانية بعد قليل.' });
   } catch (error) {
     console.error('Dalily chat handler failure', error?.message || String(error));
