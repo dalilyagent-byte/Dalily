@@ -50,18 +50,11 @@ async function startWaveCall(to, host) {
   const apiKey = process.env.WAVE_API_KEY;
   if (!apiKey) return { ok: false, status: 503, error: 'مفتاح Wave غير مهيأ في دليلي' };
 
-  const payload = {
-    to,
-    language: 'ar-SA',
-    webhook: process.env.WAVE_WEBHOOK_URL || `https://${host}/api/voice/webhook`
-  };
-  if (process.env.WAVE_CALLER_ID) payload.from = process.env.WAVE_CALLER_ID;
-  if (process.env.WAVE_FLOW) payload.flow = process.env.WAVE_FLOW;
-
-  const response = await fetch('https://api.wave.sa/v1/calls', {
+  const sandboxPayload = { to };
+  const response = await fetch('https://api.wave.sa/v1/callback', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
+    body: JSON.stringify(sandboxPayload),
     signal: AbortSignal.timeout(10000)
   });
   const data = await response.json().catch(() => ({}));
