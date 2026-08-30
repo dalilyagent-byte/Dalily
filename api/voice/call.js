@@ -49,14 +49,21 @@ export default async function handler(req, res) {
     if (!apiKey) return res.status(503).json({ error: 'خدمة الاتصال غير مهيأة بعد', code: 'wave_not_configured' });
     const to = normalizeSaudiNumber(req.body?.to);
     if (!to) return res.status(400).json({ error: 'رقم الجوال السعودي غير صحيح' });
-    const payload = {
-      to,
-      language: 'ar-SA',
-      webhook: process.env.WAVE_WEBHOOK_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/voice/webhook`
-    };
-    if (process.env.WAVE_CALLER_ID) payload.from = process.env.WAVE_CALLER_ID;
-    if (process.env.WAVE_FLOW) payload.flow = process.env.WAVE_FLOW;
-    const response = await fetch('https://api.wave.sa/v1/calls', {
+
+    // Wave sandbox uses Web Callback. Production voice calling can be switched later
+    // when Wave enables an sk_live_ key for the account.
+    const sandbox = apiKey.startsWith('sk_sandbox_');
+    const endpoint = sandbox ? 'https://api.wave.sa/v1/callback' : 'https://api.wave.sa/v1/calls';
+    const payload = { to };
+
+    if (!sandbox) {
+      payload.language = 'ar-SA';
+      payload.webhook = process.env.WAVE_WEBHOOK_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}/api/voice/webhook`;
+      if (process.env.WAVE_CALLER_ID) payload.from = process.env.WAVE_CALLER_ID;
+      if (process.env.WAVE_FLOW) payload.flow = process.env.WAVE_FLOW;
+    }
+
+    const response = await fetch(endpoint, {
       method: 'POST',
       headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
@@ -65,9 +72,13 @@ export default async function handler(req, res) {
     const data = await response.json().catch(() => ({}));
     if (!response.ok) {
       console.error('Wave call failed', response.status, data);
-      return res.status(502).json({ error: data?.message || data?.error || 'تعذر بدء المكالمة عبر Wave', providerStatus: response.status });
+      return res.status(502).json({
+        error: data?.message_ar || data?.message || data?.error || 'تعذر بدء المكالمة عبر Wave',
+        code: data?.error_code || null,
+        providerStatus: response.status
+      });
     }
-    return res.status(202).json({ ok: true, provider: 'wave', callId: data.id || null, status: data.status || 'queued', to });
+    return res.status(202).json({ ok: true, provider: 'wave', callId: data.id || null, status: data.status || 'initiated', to, mode: sandbox ? 'sandbox' : 'production' });
   } catch (error) {
     console.error('Dalily voice call failure', error?.message || String(error));
     if (/token|signature|expired|auth_/.test(error?.message || '')) return res.status(401).json({ error: 'انتهت جلسة الدخول، سجّل الدخول مرة ثانية' });
