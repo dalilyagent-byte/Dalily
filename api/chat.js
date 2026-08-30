@@ -46,15 +46,14 @@ function normalizeSaudiNumber(value) {
   return null;
 }
 
-async function startWaveCall(to, host) {
+async function startWaveCall(to) {
   const apiKey = process.env.WAVE_API_KEY;
   if (!apiKey) return { ok: false, status: 503, error: 'مفتاح Wave غير مهيأ في دليلي' };
 
-  const sandboxPayload = { to };
   const response = await fetch('https://api.wave.sa/v1/callback', {
     method: 'POST',
     headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify(sandboxPayload),
+    body: JSON.stringify({ to }),
     signal: AbortSignal.timeout(10000)
   });
   const data = await response.json().catch(() => ({}));
@@ -107,7 +106,7 @@ async function geminiReply(messages) {
 
 function detectAction(message) {
   const q = String(message || '').trim().slice(0, 500);
-  let match = q.match(/^(?:دليلي\s+)?(?:اتصل|اتّصل|كلم|كلّم)\s+(?:على\s+)?(\+?9665\d{8}|05\d{8})(?:\s+(?:وقل|وقله|وقل له|بخصوص)\s+(.+))?$/i);
+  let match = q.match(/^(?:دليلي\s+)?(?:اتصل|اتّصل|كلم|كلّم)\s+(?:على\s+)?(\+?9665\d{8}|05\d{8})(?:\s+(?:وقل|وقله|وقل له|وقل لها|بخصوص|واذكر|ووضح)\s+(.+))?$/i);
   if (match?.[1]) return { type: 'make_call', to: normalizeSaudiNumber(match[1]), purpose: (match[2] || '').trim().slice(0, 300) };
   match = q.match(/^(?:أضف|اضف|أنشئ|انشئ|سجّل|سجل)\s+(?:لي\s+)?مهمة\s*[:：-]?\s*(.+)$/i);
   if (match?.[1]) return { type: 'create_task', title: match[1].trim().slice(0, 180) };
@@ -160,13 +159,14 @@ export default async function handler(req, res) {
     const action = detectAction(messages.at(-1).parts[0].text);
     if (action?.type === 'make_call') {
       if (!action.to) return res.status(400).json({ error: 'رقم الجوال السعودي غير صحيح' });
-      const call = await startWaveCall(action.to, req.headers.host);
+      const call = await startWaveCall(action.to);
       if (!call.ok) {
         const text = call.status === 401 || call.status === 403 ? 'Wave رفض المكالمة. مفتاح أو صلاحيات البيئة الحالية تحتاج مراجعة.' : `ما قدرت أبدأ المكالمة الآن: ${call.error}`;
         return res.status(200).json({ text, reply: text, mode: 'voice-error', provider: 'wave', providerStatus: call.status });
       }
-      const text = `تم إرسال طلب الاتصال إلى ${action.to} عبر Wave${call.id ? ` — رقم المكالمة ${call.id}` : ''}.`;
-      return res.status(200).json({ text, reply: text, mode: 'voice', provider: 'wave', callId: call.id, status: call.status, to: action.to });
+      const purposeNote = action.purpose ? `\nالموضوع اللي فهمته للمكالمة: ${action.purpose}\nتنبيه: Wave التجريبي يبدأ الاتصال فقط، وما يقدر ينطق هذا النص داخل المكالمة إلى أن تتاح واجهة المحادثة الصوتية.` : '';
+      const text = `تم إرسال طلب الاتصال إلى ${action.to} عبر Wave${call.id ? ` — رقم المكالمة ${call.id}` : ''}.${purposeNote}`;
+      return res.status(200).json({ text, reply: text, mode: 'voice', provider: 'wave', callId: call.id, status: call.status, to: action.to, purpose: action.purpose || '' });
     }
     if (action) {
       const text = actionReply(action);
