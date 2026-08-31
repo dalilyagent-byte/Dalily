@@ -19,6 +19,52 @@ function getVapiConfig() {
   };
 }
 
+function zadarmaSaudiNumber(value) {
+  const digits = String(value || '').replace(/\D/g, '');
+  if (/^05\d{8}$/.test(digits)) return `966${digits.slice(1)}`;
+  if (/^9665\d{8}$/.test(digits)) return digits;
+  return String(value || '').replace(/^\+/, '');
+}
+
+async function ensureZadarmaNoLeadingPlus(apiKey, phoneNumberId) {
+  try {
+    const phoneResponse = await fetch(`https://api.vapi.ai/phone-number/${encodeURIComponent(phoneNumberId)}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!phoneResponse.ok) return false;
+    const phone = await phoneResponse.json().catch(() => ({}));
+    const credentialId = phone?.credentialId;
+    if (!credentialId) return false;
+
+    const credentialResponse = await fetch(`https://api.vapi.ai/credential/${encodeURIComponent(credentialId)}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!credentialResponse.ok) return false;
+    const credential = await credentialResponse.json().catch(() => ({}));
+    if (credential?.outboundLeadingPlusEnabled === false) return true;
+
+    const updateResponse = await fetch(`https://api.vapi.ai/credential/${encodeURIComponent(credentialId)}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ outboundLeadingPlusEnabled: false }),
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!updateResponse.ok) {
+      console.error('Vapi SIP credential update failed', updateResponse.status, await updateResponse.text().catch(() => ''));
+      return false;
+    }
+    return true;
+  } catch (error) {
+    console.error('Vapi SIP leading-plus configuration failed', error?.message || String(error));
+    return false;
+  }
+}
+
 export async function startVapiCall(to) {
   const { apiKey, assistantId, phoneNumberId } = getVapiConfig();
 
@@ -27,6 +73,9 @@ export async function startVapiCall(to) {
   }
 
   try {
+    const number = zadarmaSaudiNumber(to);
+    await ensureZadarmaNoLeadingPlus(apiKey, phoneNumberId);
+
     const response = await fetch('https://api.vapi.ai/call/phone', {
       method: 'POST',
       headers: {
@@ -37,7 +86,7 @@ export async function startVapiCall(to) {
         assistantId,
         phoneNumberId,
         customer: {
-          number: to,
+          number,
           numberE164CheckEnabled: false
         }
       }),
