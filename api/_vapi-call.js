@@ -11,10 +11,16 @@ function cleanApiKey(value) {
     .trim();
 }
 
+function getVapiConfig() {
+  return {
+    apiKey: cleanApiKey(process.env.VAPI_API_KEY),
+    assistantId: cleanEnv(process.env.VAPI_ASSISTANT_ID).replace(/^['"]+|['"]+$/g, ''),
+    phoneNumberId: cleanEnv(process.env.VAPI_PHONE_NUMBER_ID).replace(/^['"]+|['"]+$/g, '')
+  };
+}
+
 export async function startVapiCall(to) {
-  const apiKey = cleanApiKey(process.env.VAPI_API_KEY);
-  const assistantId = cleanEnv(process.env.VAPI_ASSISTANT_ID).replace(/^['"]+|['"]+$/g, '');
-  const phoneNumberId = cleanEnv(process.env.VAPI_PHONE_NUMBER_ID).replace(/^['"]+|['"]+$/g, '');
+  const { apiKey, assistantId, phoneNumberId } = getVapiConfig();
 
   if (!apiKey || !assistantId || !phoneNumberId) {
     return { ok: false, status: 503, error: 'إعدادات Vapi غير مكتملة في دليلي' };
@@ -52,5 +58,73 @@ export async function startVapiCall(to) {
   } catch (error) {
     console.error('Vapi outbound call request failed', error?.message || String(error));
     return { ok: false, status: 502, error: 'تعذر الاتصال بخدمة Vapi' };
+  }
+}
+
+export async function getLatestVapiCallReport() {
+  const { apiKey, assistantId } = getVapiConfig();
+  if (!apiKey || !assistantId) {
+    return { ok: false, status: 503, error: 'إعدادات Vapi غير مكتملة في دليلي' };
+  }
+
+  try {
+    const response = await fetch('https://api.vapi.ai/call', {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(15000)
+    });
+    const data = await response.json().catch(() => []);
+    if (!response.ok) {
+      console.error('Vapi call history failed', response.status, data);
+      return { ok: false, status: response.status, error: 'تعذر قراءة سجل مكالمات Vapi' };
+    }
+
+    const calls = Array.isArray(data) ? data : [];
+    const relevant = calls
+      .filter(call => call?.assistantId === assistantId || call?.assistant?.id === assistantId)
+      .filter(call => call?.type === 'outboundPhoneCall' || call?.type === 'outbound')
+      .sort((a, b) => new Date(b?.createdAt || 0) - new Date(a?.createdAt || 0));
+
+    const call = relevant.find(item => {
+      const transcript = item?.artifact?.transcript || item?.transcript;
+      const messages = item?.artifact?.messages || item?.messages;
+      return transcript || (Array.isArray(messages) && messages.length);
+    }) || relevant[0];
+
+    if (!call) return { ok: false, status: 404, error: 'ما لقيت مكالمة سابقة لدليلي' };
+
+    let fullCall = call;
+    if (call?.id) {
+      const detailResponse = await fetch(`https://api.vapi.ai/call/${encodeURIComponent(call.id)}`, {
+        headers: { Authorization: `Bearer ${apiKey}` },
+        signal: AbortSignal.timeout(15000)
+      });
+      if (detailResponse.ok) fullCall = await detailResponse.json().catch(() => call);
+    }
+
+    const transcript = String(fullCall?.artifact?.transcript || fullCall?.transcript || '').trim();
+    const messages = fullCall?.artifact?.messages || fullCall?.messages || [];
+    const summary = String(fullCall?.analysis?.summary || '').trim();
+    const customerNumber = fullCall?.customer?.number || fullCall?.destination?.number || '';
+    const endedReason = fullCall?.endedReason || '';
+
+    const fallbackTranscript = Array.isArray(messages)
+      ? messages
+          .filter(m => m?.message)
+          .map(m => `${m.role === 'assistant' ? 'دليلي' : 'العميل'}: ${m.message}`)
+          .join('\n')
+      : '';
+
+    return {
+      ok: true,
+      id: fullCall?.id || null,
+      customerNumber,
+      summary,
+      transcript: transcript || fallbackTranscript,
+      endedReason,
+      status: fullCall?.status || ''
+    };
+  } catch (error) {
+    console.error('Vapi call history request failed', error?.message || String(error));
+    return { ok: false, status: 502, error: 'تعذر قراءة نتيجة المكالمة من Vapi' };
   }
 }
