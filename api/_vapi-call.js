@@ -4,10 +4,17 @@ function cleanEnv(value) {
     .trim();
 }
 
+function cleanApiKey(value) {
+  return cleanEnv(value)
+    .replace(/^['"]+|['"]+$/g, '')
+    .replace(/^Bearer\s+/i, '')
+    .trim();
+}
+
 export async function startVapiCall(to) {
-  const apiKey = cleanEnv(process.env.VAPI_API_KEY);
-  const assistantId = cleanEnv(process.env.VAPI_ASSISTANT_ID);
-  const phoneNumberId = cleanEnv(process.env.VAPI_PHONE_NUMBER_ID);
+  const apiKey = cleanApiKey(process.env.VAPI_API_KEY);
+  const assistantId = cleanEnv(process.env.VAPI_ASSISTANT_ID).replace(/^['"]+|['"]+$/g, '');
+  const phoneNumberId = cleanEnv(process.env.VAPI_PHONE_NUMBER_ID).replace(/^['"]+|['"]+$/g, '');
 
   if (!apiKey || !assistantId || !phoneNumberId) {
     return { ok: false, status: 503, error: 'إعدادات Vapi غير مكتملة في دليلي' };
