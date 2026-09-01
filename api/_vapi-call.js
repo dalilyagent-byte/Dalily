@@ -126,6 +126,56 @@ export async function startVapiCall(to, purpose) {
   }
 }
 
+
+export async function getVapiCallReport(callId) {
+  const { apiKey } = getVapiConfig();
+  const id = String(callId || '').trim();
+  if (!apiKey || !id) {
+    return { ok: false, status: 400, error: 'رقم المكالمة غير صالح' };
+  }
+
+  try {
+    const response = await fetch(`https://api.vapi.ai/call/${encodeURIComponent(id)}`, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+      signal: AbortSignal.timeout(15000)
+    });
+    const call = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      return { ok: false, status: response.status, error: 'تعذر قراءة نتيجة المكالمة من Vapi' };
+    }
+
+    const transcript = String(call?.artifact?.transcript || call?.transcript || '').trim();
+    const messages = call?.artifact?.messages || call?.messages || [];
+    const summary = String(call?.analysis?.summary || '').trim();
+    const customerNumber = call?.customer?.number || call?.destination?.number || '';
+    const endedReason = String(call?.endedReason || '');
+    const customerSpoke = Array.isArray(messages) && messages.some(message =>
+      /^(?:user|customer)$/i.test(String(message?.role || '')) &&
+      String(message?.message || message?.content || '').trim()
+    );
+    const fallbackTranscript = Array.isArray(messages)
+      ? messages
+          .filter(message => message?.message || message?.content)
+          .map(message => `${/^(?:assistant|bot)$/i.test(String(message.role || '')) ? 'دليلي' : 'العميل'}: ${message.message || message.content}`)
+          .join('\n')
+      : '';
+
+    return {
+      ok: true,
+      id: call?.id || id,
+      customerNumber,
+      summary,
+      transcript: transcript || fallbackTranscript,
+      endedReason,
+      customerSpoke,
+      status: String(call?.status || '')
+    };
+  } catch (error) {
+    console.error('Vapi call report request failed', error?.message || String(error));
+    return { ok: false, status: 502, error: 'تعذر قراءة نتيجة المكالمة من Vapi' };
+  }
+}
+
 export async function getLatestVapiCallReport() {
   const { apiKey, assistantId } = getVapiConfig();
   if (!apiKey || !assistantId) {
