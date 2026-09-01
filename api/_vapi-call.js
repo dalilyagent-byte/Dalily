@@ -26,6 +26,14 @@ function zadarmaSaudiNumber(value) {
   return String(value || '').replace(/^\+/, '');
 }
 
+function cleanCallScript(value) {
+  return String(value || '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 800);
+}
+
 async function ensureZadarmaNoLeadingPlus(apiKey, phoneNumberId) {
   try {
     const phoneResponse = await fetch(`https://api.vapi.ai/phone-number/${encodeURIComponent(phoneNumberId)}`, {
@@ -65,7 +73,7 @@ async function ensureZadarmaNoLeadingPlus(apiKey, phoneNumberId) {
   }
 }
 
-export async function startVapiCall(to) {
+export async function startVapiCall(to, purpose) {
   const { apiKey, assistantId, phoneNumberId } = getVapiConfig();
 
   if (!apiKey || !assistantId || !phoneNumberId) {
@@ -74,6 +82,10 @@ export async function startVapiCall(to) {
 
   try {
     const number = zadarmaSaudiNumber(to);
+    const callScript = cleanCallScript(purpose);
+    if (!callScript) {
+      return { ok: false, status: 400, error: 'اكتب الجملة التي تريد من دليلي قولها بعد التحية' };
+    }
     await ensureZadarmaNoLeadingPlus(apiKey, phoneNumberId);
 
     const response = await fetch('https://api.vapi.ai/call/phone', {
@@ -84,6 +96,10 @@ export async function startVapiCall(to) {
       },
       body: JSON.stringify({
         assistantId,
+        assistantOverrides: {
+          firstMessage: `السلام عليكم انا مساعد ابو بندر الرقمي. ${callScript}`,
+          variableValues: { callScript }
+        },
         phoneNumberId,
         customer: {
           number,
