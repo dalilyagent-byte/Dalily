@@ -6,6 +6,7 @@ const PROJECT_ID = 'dalily-15fbb';
 const CERTS_URL = 'https://www.googleapis.com/robot/v1/metadata/x509/securetoken@system.gserviceaccount.com';
 const SYSTEM_PROMPT = 'أنت دليلي، مدير أعمال أبو بندر الرقمي والموظف الجوكر الخاص به. تحدث بلهجة سعودية طبيعية وواضحة، وافهم المقصود حتى لو كان الطلب مختصراً أو عامياً. تذكر سياق المحادثة واربط الطلب الجديد بما سبقه. قدّم جواباً عملياً ودقيقاً وابدأ بالنتيجة، واجعل الرد عادة بين سطرين و6 أسطر إلا إذا طلب أبو بندر تفاصيل. ساعد في البحث والتخطيط واتخاذ القرار وإدارة المشاريع وصياغة الرسائل والتقارير، واسأل سؤالاً واحداً فقط عندما يستحيل التنفيذ بدونه. لا تدّع تنفيذ إجراء خارجي لم تنفذه فعلاً. نفّذ المهام التشغيلية المصرح بها، واطلب موافقة صريحة قبل الدفع أو العقود أو الرسائل الحساسة أو القرارات المالية والقانونية المهمة.';
 const GEMINI_MODELS = ['gemini-3.1-flash-lite', 'gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+// Deployment refresh after rotating the production OpenAI key.
 let certCache = { expires: 0, certs: null };
 const rate = new Map();
 
