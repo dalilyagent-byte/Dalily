@@ -73,7 +73,7 @@ async function ensureZadarmaNoLeadingPlus(apiKey, phoneNumberId) {
   }
 }
 
-export async function startVapiCall(to, purpose) {
+export async function startVapiCall(to, purpose, pushSubscription) {
   const { apiKey, assistantId, phoneNumberId } = getVapiConfig();
 
   if (!apiKey || !assistantId || !phoneNumberId) {
@@ -98,8 +98,11 @@ export async function startVapiCall(to, purpose) {
         assistantId,
         assistantOverrides: {
           firstMessage: `السلام عليكم انا مساعد ابو بندر الرقمي. ${callScript}`,
-          variableValues: { callScript }
+          variableValues: { callScript },
+          server: { url: 'https://dalily-swart.vercel.app/api/vapi-events' },
+          serverMessages: ['end-of-call-report']
         },
+        metadata: pushSubscription?.endpoint ? { dalilyPushSubscription: Buffer.from(JSON.stringify(pushSubscription)).toString('base64url') } : {},
         phoneNumberId,
         customer: {
           number,
