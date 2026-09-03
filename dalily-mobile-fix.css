@@ -12,6 +12,10 @@ html,body,.app-shell{width:100%;max-width:100%;overflow-x:hidden}
 .quick-grid,.today-grid{min-width:0;max-width:100%}
 .quick-action,.metric-card{min-width:0}
 .bubble{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+
+/* Execution history belongs in Home/Reports, not inside the conversation. */
+.execution-card{display:none!important}
+
 @media(max-width:680px){
   .workspace{width:100%;max-width:100%;overflow-x:hidden}
   .activity-item{width:100%;align-items:flex-start}
@@ -20,4 +24,36 @@ html,body,.app-shell{width:100%;max-width:100%;overflow-x:hidden}
   .item{overflow:hidden}
   .section-head{gap:8px}
   .section-head h2,.section-head h3{min-width:0;overflow-wrap:anywhere}
+
+  /* Keep the chat composer visible; only messages scroll. */
+  #chat.panel.active{min-height:0}
+  #chat.panel.active .chat-card{
+    height:calc(100dvh - 172px);
+    max-height:calc(100dvh - 172px);
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+    overflow:hidden;
+  }
+  #chat .chat-header{flex:0 0 auto}
+  #chat .chatbox{
+    flex:1 1 auto;
+    height:auto!important;
+    min-height:0!important;
+    overflow-y:auto;
+    overscroll-behavior:contain;
+    padding-bottom:14px;
+  }
+  #chat .quick-chips{
+    flex:0 0 auto;
+    padding-top:8px;
+    background:#fff;
+  }
+  #chat .chat-form{
+    flex:0 0 auto;
+    position:relative;
+    z-index:3;
+    background:#fff;
+    padding-bottom:12px;
+  }
 }
