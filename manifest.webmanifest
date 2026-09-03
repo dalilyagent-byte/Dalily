@@ -1,15 +1,17 @@
 {
+  "id": "/",
   "name": "دليلي",
   "short_name": "دليلي",
-  "start_url": "/app.html",
+  "start_url": "/?app=v4",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#f6f8fb",
-  "theme_color": "#0d4d7f",
+  "theme_color": "#f8fafc",
   "icons": [
     {
-      "src": "/dalily-icon.svg",
+      "src": "/dalily-icon-v2.png?v=11",
       "sizes": "512x512",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
