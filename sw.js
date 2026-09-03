@@ -1,3 +1,4 @@
+self.addEventListener('push',event=>{const data=event.data?.json?.()||{};event.waitUntil(self.registration.showNotification(data.title||'دليلي',{body:data.body||'عندك تحديث جديد.',icon:'/dalily-icon-v2.png?v=10',badge:'/dalily-icon-v2.png?v=10',tag:data.tag||'dalily-background',data:{url:data.url||'/app.html'}}));});
 self.addEventListener('install',()=>self.skipWaiting());
 self.addEventListener('activate',event=>event.waitUntil(self.clients.claim()));
 self.addEventListener('notificationclick',event=>{
