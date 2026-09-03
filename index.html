@@ -6,9 +6,18 @@
 <meta name="theme-color" content="#f8fafc">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 <title>دليلي — مدير أعمالك</title>
-<link rel="stylesheet" href="/dalily-v2.css?v=1">
-<link rel="stylesheet" href="/dalily-mobile-fix.css?v=1">
+<link rel="stylesheet" href="/dalily-v2.css?v=3">
+<link rel="stylesheet" href="/dalily-mobile-fix.css?v=3">
+<style>
+html,body,.app-shell{width:100%;max-width:100%;overflow-x:hidden!important}
+.workspace,.panel,.section,.activity-list,.activity-item,.activity-main,.content-card,.chat-card,.hero-card,.list,.item,.opp-main{min-width:0!important;max-width:100%!important}
+.activity-title,.title,.meta,.hint,.source,.execution-info strong,.execution-info span{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;text-overflow:clip!important;overflow:visible!important}
+.activity-item,.item{width:100%!important;overflow:hidden!important}
+</style>
 </head>
 <body>
 <div class="app-shell">
@@ -56,7 +65,25 @@
       <div id="homeActivity" class="activity-list"><div class="empty">كل شيء هادئ الآن. أعط دليلي أول طلب.</div></div>
     </div>
   </section>
-  <section id="chat" class="panel"><div class="chat-card"><div class="chat-header"><div class="chat-title">محادثة دليلي</div><div id="chatState" class="chat-status">جاهز</div></div><div id="cm" class="chatbox"><div class="bubble agent">هلا أبو بندر، أنا دليلي. وش تبي أنجز لك اليوم؟</div></div><div id="lastExecution" class="execution-card"><div class="execution-label">آخر تنفيذ</div><div class="execution-row"><div class="execution-icon">✓</div><div class="execution-info"><strong id="lastExecutionTitle">تنفيذ طلب</strong><span id="lastExecutionStatus">الحالة: مكتمل • الآن</span></div></div></div><div class="quick-chips"><button class="chip" data-chatprompt="اتصل على " type="button">☎ اتصال</button><button class="chip" data-chatprompt="أنشئ لي موعد في التقويم " type="button">▣ جدولة</button><button class="chip" data-chatprompt="ابحث لي عن " type="button">⌕ بحث</button><button class="chip" data-chatprompt="أعطني تقرير المدير المختصر" type="button">▤ تقرير</button></div><form id="cf" class="chat-form"><textarea id="ci" maxlength="4000" placeholder="اكتب طلبك لدليلي..." required></textarea><button id="cs" class="send-btn" type="submit" aria-label="إرسال">➤</button></form></div></section>
+
+  <section id="chat" class="panel">
+    <div class="chat-card">
+      <div class="chat-header"><div class="chat-title">محادثة دليلي</div><div id="chatState" class="chat-status">جاهز</div></div>
+      <div id="cm" class="chatbox"><div class="bubble agent">هلا أبو بندر، أنا دليلي. وش تبي أنجز لك اليوم؟</div></div>
+      <div id="lastExecution" class="execution-card">
+        <div class="execution-label">آخر تنفيذ</div>
+        <div class="execution-row"><div class="execution-icon">✓</div><div class="execution-info"><strong id="lastExecutionTitle">تنفيذ طلب</strong><span id="lastExecutionStatus">الحالة: مكتمل • الآن</span></div></div>
+      </div>
+      <div class="quick-chips">
+        <button class="chip" data-chatprompt="اتصل على " type="button">☎ اتصال</button>
+        <button class="chip" data-chatprompt="أنشئ لي موعد في التقويم " type="button">▣ جدولة</button>
+        <button class="chip" data-chatprompt="ابحث لي عن " type="button">⌕ بحث</button>
+        <button class="chip" data-chatprompt="أعطني تقرير المدير المختصر" type="button">▤ تقرير</button>
+      </div>
+      <form id="cf" class="chat-form"><textarea id="ci" maxlength="4000" placeholder="اكتب طلبك لدليلي..." required></textarea><button id="cs" class="send-btn" type="submit" aria-label="إرسال">➤</button></form>
+    </div>
+  </section>
+
   <section id="reports" class="panel"><div class="content-card"><div class="section-head"><div><h2>التقارير</h2><div class="hint">آخر الأوامر والتنفيذات على هذا الجهاز.</div></div></div><div id="reportsList" class="activity-list" style="margin-top:14px"><div class="empty">ما فيه تنفيذات مسجلة حتى الآن.</div></div><button class="primary" data-chatprompt="أعطني تقرير المدير المختصر" type="button" style="width:100%;margin-top:14px">اطلب تقرير جديد من دليلي</button></div></section>
   <section id="settings" class="panel"><div class="content-card"><h2>الإعدادات</h2><div class="hint">حسابك وربط أدوات دليلي.</div><div class="settings-list"><div class="settings-row"><div><strong>الحساب</strong><br><span id="accountEmail">متصل</span></div><span>Google</span></div><div class="settings-row"><div><strong>صلاحيات المدير</strong><br><span>Gmail • Calendar • Contacts • Drive • Docs</span></div><a class="settings-link" href="/api/google-connect">إعادة الربط</a></div><div class="settings-row"><div><strong>الأدوات الداخلية</strong><br><span>المهام والمشاريع والفرص</span></div><span>مفعلة</span></div></div><div class="hidden-panels-nav"><button class="mini-nav" data-goto="tasks" type="button">المهام</button><button class="mini-nav" data-goto="projects" type="button">المشاريع</button><button class="mini-nav" data-goto="opportunities" type="button">الفرص</button></div><button id="logout" class="danger" type="button" style="width:100%;margin-top:18px">تسجيل الخروج</button></div></section>
   <section id="tasks" class="panel"><div class="content-card"><div class="section-head"><div><h2>المهام</h2><div class="hint">إضافة ومتابعة مهامك.</div></div><button class="secondary mini" data-goto="home" type="button">الرئيسية</button></div><form id="tf" class="form three"><input id="tt" placeholder="مثال: التواصل مع المورد" required><select id="tp"><option value="">بدون مشروع</option></select><button class="primary">إضافة مهمة</button></form><div id="tl" class="list"><div class="empty">لا توجد مهام بعد</div></div></div></section>
@@ -65,6 +92,6 @@
   <nav class="bottom-nav" aria-label="التنقل الرئيسي"><button class="tab active" data-tab="home" type="button"><span class="nav-icon">⌂</span><span>الرئيسية</span></button><button class="tab" data-tab="chat" type="button"><span class="nav-icon">◯</span><span>المحادثة</span></button><button class="tab" data-tab="reports" type="button"><span class="nav-icon">▤</span><span>التقارير</span></button><button class="tab" data-tab="settings" type="button"><span class="nav-icon">⚙</span><span>الإعدادات</span></button></nav>
 </main>
 </div>
-<script type="module" src="/dalily-v2.js?v=1"></script>
+<script type="module" src="/dalily-v2.js?v=3"></script>
 </body>
 </html>
