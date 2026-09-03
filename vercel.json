@@ -1,4 +1,7 @@
 {
+  "redirects": [
+    { "source": "/app.html", "destination": "/?app=v4", "permanent": false }
+  ],
   "rewrites": [
     { "source": "/api/chat", "destination": "/api/chat-wrapper" }
   ],
@@ -8,11 +11,23 @@
       "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
     },
     {
+      "source": "/app.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
+    },
+    {
       "source": "/index.html",
       "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
     },
     {
       "source": "/index-v2.html",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/sw.js",
       "headers": [{ "key": "Cache-Control", "value": "no-store, max-age=0, must-revalidate" }]
     },
     {
