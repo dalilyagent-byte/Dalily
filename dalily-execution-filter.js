@@ -79,3 +79,13 @@
     return rawSetItem.call(this,key,value);
   };
 })();
+
+// Load Dalily notification center without touching the main module or navigation handlers.
+(()=>{
+  if(document.querySelector('script[data-dalily-notifications]'))return;
+  const script=document.createElement('script');
+  script.src='/dalily-notifications.js?v=1';
+  script.defer=true;
+  script.dataset.dalilyNotifications='1';
+  document.head.appendChild(script);
+})();
