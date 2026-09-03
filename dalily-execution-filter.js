@@ -40,7 +40,6 @@
     return EXECUTION_ACTIONS.has(type);
   }
 
-  // Every turn starts as a normal reply. The API promotes it only when a real action occurred.
   document.addEventListener('submit',e=>{
     if(e.target?.id!=='cf')return;
     shouldRecord=false;
@@ -80,7 +79,6 @@
   };
 })();
 
-// Load Dalily notification center without touching the main module or navigation handlers.
 (()=>{
   if(document.querySelector('script[data-dalily-notifications]'))return;
   const script=document.createElement('script');
@@ -90,7 +88,6 @@
   document.head.appendChild(script);
 })();
 
-// Dalily command center: turns the home screen into a one-tap business manager dashboard.
 (()=>{
   const home=document.getElementById('home');
   const nav=document.querySelector('.bottom-nav');
@@ -122,9 +119,9 @@
     <div class="command-intro"><div><h3>مركز القيادة</h3><p>اختر القسم ودليلي يبدأ مباشرة</p></div><span class="status-pill"><span class="status-dot"></span><span>جاهز</span></span></div>
     <div class="command-grid">
       <button class="command-card trade" data-dalily-run="ابحث الآن في الويب عن أفضل 3 فرص تجارية واستثمارية قابلة للتنفيذ الآن. ابدأ بالفرص منخفضة التكلفة وتحت 1000 ريال إن وجدت، وركز على السعودية وخصوصاً جدة والطائف أو الفرص الرقمية. رتّبها من الأفضل، ولكل فرصة أعطني التكلفة المتوقعة والربح المحتمل والمخاطر وسبب اختيارها وأول خطوة عملية، ثم دعني أختار منها." type="button"><span class="command-icon">↗</span><span class="command-copy"><span class="command-title">التجارة</span><span class="command-note">يبحث عن أفضل الفرص ويقارنها لك</span></span></button>
-      <button class="command-card business" data-dalily-run="أعطني لوحة أعمال اليوم: اعرض المهام المفتوحة، وما تأخر، وما ينتظر ردي أو قراري، ورتب أهم 3 أولويات أبدأ بها الآن. استخدم مهامي ومشاريعي المسجلة عندك." type="button"><span class="command-icon">✓</span><span class="command-copy"><span class="command-title">الأعمال</span><span class="command-note">مهام اليوم والأولويات والمتابعة</span></span></button>
+      <button class="command-card business" data-goto="tasks" type="button"><span class="command-icon">✓</span><span class="command-copy"><span class="command-title">الأعمال</span><span class="command-note">افتح مهامك وأضف وتابع الأعمال مباشرة</span></span></button>
       <button class="command-card calls" data-chatprompt="اتصل على " type="button"><span class="command-icon">☎</span><span class="command-copy"><span class="command-title">الاتصالات</span><span class="command-note">اكتب الرقم وما تريد من دليلي قوله</span></span></button>
-      <button class="command-card projects" data-dalily-run="اعرض مشاريعي الحالية، وحالة كل مشروع ونسبة تقدمه إن أمكن، والمهام المفتوحة فيه، ثم حدد الخطوة التالية المقترحة لكل مشروع." type="button"><span class="command-icon">▣</span><span class="command-copy"><span class="command-title">المشاريع</span><span class="command-note">الحالة والتقدم والخطوة التالية</span></span></button>
+      <button class="command-card projects" data-goto="projects" type="button"><span class="command-icon">▣</span><span class="command-copy"><span class="command-title">المشاريع</span><span class="command-note">افتح قائمة المشاريع وحالة كل مشروع</span></span></button>
     </div>
     <div class="section compact-today">
       <div class="section-head"><h3>اليوم</h3><span class="subtle">ملخص سريع</span></div>
