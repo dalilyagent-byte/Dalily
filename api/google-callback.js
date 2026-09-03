@@ -1,3 +1,13 @@
+import crypto from 'node:crypto';
+
+function seal(value, secret) {
+  const iv = crypto.randomBytes(12);
+  const key = crypto.createHash('sha256').update(secret).digest();
+  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+  const encrypted = Buffer.concat([cipher.update(value, 'utf8'), cipher.final()]);
+  return Buffer.concat([iv, cipher.getAuthTag(), encrypted]).toString('base64url');
+}
+
 function parseCookies(header = '') {
   return Object.fromEntries(header.split(';').map(v => v.trim()).filter(Boolean).map(v => {
     const i = v.indexOf('=');
@@ -40,7 +50,7 @@ export default async function handler(req, res) {
     return res.status(502).send(tokens.error_description || 'Google did not return a refresh token');
   }
 
-  const refresh = encodeURIComponent(tokens.refresh_token);
+  const refresh = encodeURIComponent(seal(tokens.refresh_token, clientSecret));
   res.setHeader('Set-Cookie', [
     `__Host-dalily_google_refresh=${refresh}; Path=/; Max-Age=15552000; HttpOnly; Secure; SameSite=Lax`,
     '__Host-dalily_oauth_state=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax'
