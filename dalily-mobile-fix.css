@@ -1,0 +1,23 @@
+/* Mobile overflow and long-text fix */
+html,body,.app-shell{width:100%;max-width:100%;overflow-x:hidden}
+.workspace,.panel,.section,.activity-list,.content-card,.chat-card,.hero-card,.list{width:100%;max-width:100%;min-width:0}
+.activity-item,.item,.settings-row,.execution-row,.section-head{min-width:0;max-width:100%}
+.activity-main,.opp-main,.execution-info,.hero-text,.settings-row>div,.section-head>div{min-width:0;max-width:100%}
+.activity-title,.title,.meta,.hint,.source,.execution-info strong,.execution-info span,.settings-row strong,.settings-row span,.hero-text h2,.hero-text p{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:anywhere;word-break:break-word}
+.activity-title{line-height:1.5}
+.item{width:100%}
+.opp-top{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.source{display:inline-block;max-width:100%}
+.form input,.form select,.form textarea{min-width:0;width:100%;max-width:100%}
+.quick-grid,.today-grid{min-width:0;max-width:100%}
+.quick-action,.metric-card{min-width:0}
+.bubble{min-width:0;overflow-wrap:anywhere;word-break:break-word}
+@media(max-width:680px){
+  .workspace{width:100%;max-width:100%;overflow-x:hidden}
+  .activity-item{width:100%;align-items:flex-start}
+  .activity-title{font-size:15px;line-height:1.55}
+  .activity-main{overflow:hidden}
+  .item{overflow:hidden}
+  .section-head{gap:8px}
+  .section-head h2,.section-head h3{min-width:0;overflow-wrap:anywhere}
+}
