@@ -1,5 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/chat", "destination": "/api/chat-wrapper" }
+    { "source": "/api/chat", "destination": "/api/chat-wrapper" },
+    { "source": "/", "destination": "/index-v2.html" }
   ]
 }
