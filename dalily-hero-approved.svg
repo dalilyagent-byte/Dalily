@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-label="مشهد جبلي ونخيل">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9d8e4"/><stop offset=".52" stop-color="#e8ecea"/><stop offset="1" stop-color="#e9ddd0"/></linearGradient>
+    <linearGradient id="rock" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8d654e"/><stop offset="1" stop-color="#b1896f"/></linearGradient>
+    <linearGradient id="sand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#d7c2a8"/><stop offset="1" stop-color="#eadfd1"/></linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="1.4"/></filter>
+  </defs>
+  <rect width="1200" height="420" fill="url(#sky)"/>
+  <path d="M0 310L65 285 112 224 164 180 205 92 246 124 275 179 301 213 335 254 390 289 455 310Z" fill="url(#rock)" opacity=".94"/>
+  <path d="M75 285L132 230 166 173 194 122 205 97 221 151 233 203 252 237 283 270 319 298Z" fill="#6f4c3c" opacity=".22"/>
+  <path d="M0 330C195 305 290 332 455 312S755 295 1200 320V420H0Z" fill="url(#sand)"/>
+  <g fill="#405548" opacity=".98">
+    <rect x="500" y="207" width="8" height="134" rx="4"/><path d="M504 215c-28-30-62-25-76-11 27-5 53 6 76 26zm2 0c23-34 56-40 78-26-25 2-49 17-77 42zm-2 13c-40-12-68 5-77 22 24-12 52-11 78-4zm3 0c33-14 66-4 79 13-25-9-53-5-80 5z"/>
+    <rect x="616" y="228" width="7" height="111" rx="4"/><path d="M619 235c-25-27-49-24-66-9 23-4 45 7 66 24zm1 0c22-28 49-31 66-17-23 3-43 14-65 32zm-1 12c-29-11-54-2-66 12 21-7 43-6 66 5zm2 0c28-10 53-4 67 10-21-5-42-2-66 8z"/>
+    <rect x="725" y="220" width="8" height="121" rx="4"/><path d="M729 228c-29-31-59-28-76-11 25-5 51 7 76 28zm1 0c25-31 56-35 75-20-26 3-48 16-74 37zm-1 13c-33-12-61-2-75 14 23-8 49-7 75 6zm3 0c30-11 59-4 75 11-24-6-49-2-74 9z"/>
+  </g>
+  <g fill="#4c5e4f" opacity=".72" filter="url(#soft)"><ellipse cx="955" cy="309" rx="95" ry="17"/><ellipse cx="1090" cy="318" rx="75" ry="14"/></g>
+  <rect width="1200" height="420" fill="#ffffff" opacity=".06"/>
+</svg>
