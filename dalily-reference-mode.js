@@ -6,8 +6,7 @@
     const home=document.getElementById('home');
     const ws=document.getElementById('ws');
     const login=document.getElementById('loginView');
-    const shell=document.querySelector('.app-shell');
-    if(!home||!ws||!shell)return;
+    if(!home||!ws)return;
 
     const screen=document.createElement('div');
     screen.className='reference-home-screen';
@@ -32,32 +31,35 @@
       <button class="reference-hotspot ref-nav-favorites" data-ref-action="favorites" aria-label="المفضلة"></button>
       <button class="reference-hotspot ref-nav-chat" data-ref-action="chat" aria-label="المحادثة"></button>
       <button class="reference-hotspot ref-nav-home" data-ref-action="home" aria-label="الرئيسية"></button>`;
-    shell.appendChild(screen);
+    document.body.appendChild(screen);
 
     const image=screen.querySelector('.reference-home-img');
 
     async function loadApprovedReference(){
       try{
-        const stamp='20260904-final-1';
-        const parts=await Promise.all([0,1,2].map(async i=>{
-          const res=await fetch(`/dalily-ref-${i}.txt?v=${stamp}`,{cache:'no-store'});
-          if(!res.ok)throw new Error(`ref ${i}: ${res.status}`);
+        const stamp='20260904-exact-2';
+        const files=['0','1','2a','2b','2c','2d','3','4','5','6'];
+        const parts=await Promise.all(files.map(async part=>{
+          const res=await fetch(`/dalily-ref-${part}.txt?v=${stamp}`,{cache:'no-store'});
+          if(!res.ok)throw new Error(`ref ${part}: ${res.status}`);
           return (await res.text()).trim();
         }));
         const source=new Image();
         source.onload=()=>{
-          // The approved mockup contains a simulated iOS status bar. The real iPhone already supplies it.
+          // Remove only the mock iOS status bar because the real iPhone supplies it.
           const cropTop=Math.round(source.naturalHeight*0.037);
           const canvas=document.createElement('canvas');
           canvas.width=source.naturalWidth;
           canvas.height=source.naturalHeight-cropTop;
           const ctx=canvas.getContext('2d',{alpha:false});
           ctx.drawImage(source,0,cropTop,source.naturalWidth,canvas.height,0,0,canvas.width,canvas.height);
+          image.onload=()=>{
+            screen.classList.add('reference-ready');
+            syncVisibility();
+          };
           image.src=canvas.toDataURL('image/webp',0.98);
-          screen.classList.add('reference-ready');
-          syncVisibility();
         };
-        source.onerror=()=>{console.error('Dalily approved reference could not be decoded')};
+        source.onerror=()=>console.error('Dalily approved reference could not be decoded');
         source.src='data:image/webp;base64,'+parts.join('');
       }catch(err){
         console.error('Dalily approved reference load failed',err);
@@ -65,7 +67,6 @@
     }
 
     function workspaceIsOpen(){
-      if(!ws)return false;
       const wsStyle=getComputedStyle(ws);
       const loginStyle=login?getComputedStyle(login):null;
       return wsStyle.display!=='none' && (!loginStyle || loginStyle.display==='none');
