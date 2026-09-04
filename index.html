@@ -4,53 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#ffffff">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Cache-Control" content="no-cache,no-store,must-revalidate">
 <title>دليلي</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}body{overflow-x:hidden}.dalily{position:relative;width:100vw;max-width:1024px;margin:0 auto;background:#fff;min-height:100vh}.dalily img{display:block;width:100%;height:auto;margin:0;padding:0}.loading{position:fixed;inset:0;display:grid;place-items:center;background:#fff;color:#0b5c52;font-weight:800;z-index:999}.hotspot{position:absolute;border:0;background:transparent;padding:0;margin:0;z-index:3;-webkit-tap-highlight-color:transparent}.trade{left:2.5%;top:23.8%;width:31%;height:16.7%}.business{left:34.5%;top:23.8%;width:31%;height:16.7%}.projects{left:66.5%;top:23.8%;width:31%;height:16.7%}.clients{left:2.5%;top:41%;width:31%;height:16.2%}.calls{left:34.5%;top:41%;width:31%;height:16.2%}.tasks{left:66.5%;top:41%;width:31%;height:16.2%}.chat{left:2.5%;top:84.3%;width:95%;height:7.3%}.nav-home{right:0;bottom:0;width:20%;height:7.5%}.nav-chat{right:20%;bottom:0;width:20%;height:7.5%}.nav-fav{right:40%;bottom:0;width:20%;height:7.5%}.nav-reports{right:60%;bottom:0;width:20%;height:7.5%}.nav-account{right:80%;bottom:0;width:20%;height:7.5%}
+*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Tahoma,Arial,sans-serif}.dalily{position:relative;width:100%;max-width:1024px;margin:auto;background:#fff}.dalily img{display:block;width:100%;height:auto}.loading{position:fixed;inset:0;display:grid;place-items:center;background:#fff;color:#0b5c52;font-weight:800;z-index:999}.hotspot{position:absolute;border:0;background:transparent;padding:0;z-index:3}.trade{left:2.5%;top:23.8%;width:31%;height:16.7%}.business{left:34.5%;top:23.8%;width:31%;height:16.7%}.projects{left:66.5%;top:23.8%;width:31%;height:16.7%}.clients{left:2.5%;top:41%;width:31%;height:16.2%}.calls{left:34.5%;top:41%;width:31%;height:16.2%}.tasks{left:66.5%;top:41%;width:31%;height:16.2%}.chat{left:2.5%;top:84.3%;width:95%;height:7.3%}
 </style>
-</head>
-<body>
+</head><body>
 <div id="loading" class="loading">جاري فتح دليلي…</div>
-<main class="dalily" id="screen">
-  <img id="approved" alt="واجهة دليلي المعتمدة">
-  <button class="hotspot trade" aria-label="التجارة" data-action="trade"></button>
-  <button class="hotspot business" aria-label="الأعمال" data-action="business"></button>
-  <button class="hotspot projects" aria-label="المشاريع" data-action="projects"></button>
-  <button class="hotspot clients" aria-label="العملاء" data-action="clients"></button>
-  <button class="hotspot calls" aria-label="اتصل" data-action="calls"></button>
-  <button class="hotspot tasks" aria-label="مهامي" data-action="tasks"></button>
-  <button class="hotspot chat" aria-label="تكلم مع دليلي" data-action="chat"></button>
-  <button class="hotspot nav-home" aria-label="الرئيسية" data-action="home"></button>
-  <button class="hotspot nav-chat" aria-label="المحادثة" data-action="chat"></button>
-  <button class="hotspot nav-fav" aria-label="المفضلة" data-action="favorites"></button>
-  <button class="hotspot nav-reports" aria-label="التقارير" data-action="reports"></button>
-  <button class="hotspot nav-account" aria-label="حسابي" data-action="account"></button>
-</main>
+<main class="dalily"><img id="approved" alt="واجهة دليلي المعتمدة"><button class="hotspot trade" data-action="trade"></button><button class="hotspot business" data-action="business"></button><button class="hotspot projects" data-action="projects"></button><button class="hotspot clients" data-action="clients"></button><button class="hotspot calls" data-action="calls"></button><button class="hotspot tasks" data-action="tasks"></button><button class="hotspot chat" data-action="chat"></button></main>
 <script>
-(async()=>{
-  const parts=['0','1a','1b','1c','1d','2a','2b','2c','2d','3','4','5','6'];
-  try{
-    const data=await Promise.all(parts.map(async p=>{
-      const r=await fetch('/dalily-ref-'+p+'.txt?v=20260904-clean-1',{cache:'no-store'});
-      if(!r.ok)throw new Error('ref '+p);
-      return (await r.text()).trim();
-    }));
-    const img=document.getElementById('approved');
-    img.onload=()=>document.getElementById('loading').remove();
-    img.src='data:image/webp;base64,'+data.join('');
-  }catch(e){document.getElementById('loading').textContent='تعذر تحميل الواجهة';}
-  document.addEventListener('click',e=>{
-    const b=e.target.closest('[data-action]');if(!b)return;
-    const a=b.dataset.action;
-    if(a==='home')return;
-    const prompts={trade:'ابحث لي عن أفضل الفرص الاستثمارية',business:'اعرض مهامي اليومية ومتابعة التنفيذ',projects:'اعرض جميع مشاريعي',clients:'اعرض العملاء والمتابعات',calls:'اتصل على ',tasks:'اعرض المهام والمواعيد والتذكيرات',chat:'',favorites:'اعرض المفضلة',reports:'اعرض التقارير',account:'اعرض حسابي'};
-    const q=prompts[a]||'';
-    location.href='/chat.html?prompt='+encodeURIComponent(q);
-  });
-})();
-</script>
-</body>
-</html>
+function b64blob(b64,type){const bin=atob(b64);const chunks=[];for(let o=0;o<bin.length;o+=65536){const s=bin.slice(o,o+65536),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);chunks.push(a)}return new Blob(chunks,{type:type})}
+(async()=>{try{const ps=['0','1a','1b','1c','1d','2a','2b','2c','2d','3','4','5','6'];let all='';for(const p of ps){const r=await fetch('/dalily-ref-'+p+'.txt?x=20260904-safari2',{cache:'no-store'});if(!r.ok)throw Error(p);all+=(await r.text()).trim()}const img=document.getElementById('approved');const url=URL.createObjectURL(b64blob(all,'image/webp'));img.onload=()=>{document.getElementById('loading').remove();URL.revokeObjectURL(url)};img.onerror=()=>{document.getElementById('loading').textContent='تعذر فتح الواجهة'};img.src=url}catch(e){document.getElementById('loading').textContent='تعذر فتح الواجهة'}})();
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const m={trade:'ابحث لي عن أفضل الفرص الاستثمارية',business:'اعرض مهامي اليومية ومتابعة التنفيذ',projects:'اعرض جميع مشاريعي',clients:'اعرض العملاء والمتابعات',calls:'اتصل على ',tasks:'اعرض المهام والمواعيد والتذكيرات',chat:''};location.href='/chat.html?prompt='+encodeURIComponent(m[b.dataset.action]||'')});
+</script></body></html>
