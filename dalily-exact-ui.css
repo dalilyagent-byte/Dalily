@@ -1,55 +1,56 @@
-/* Dalily exact approved interface — 2026-09-04 */
+/* Dalily exact approved interface — FINAL visual reference 2026-09-04 */
 :root{--dalily-exact-ink:#0a2435;--dalily-exact-teal:#006f68;--dalily-exact-bg:#f5f5f2}
 
-/* On Home, the approved reference uses one photographic header/hero block. */
+/* Home uses a single photographic header/hero like the approved reference. */
 .app-shell:has(#home.active)>.topbar{display:none!important}
 .app-shell:has(#home.active) .workspace{padding-top:0!important}
+.app-shell:has(#home.active){background:linear-gradient(180deg,#eef3f6 0,#f4f4f1 39%,#f7f7f5 100%)!important}
 
 .approved-hero.exact-approved-hero{
-  height:178px!important;
+  height:clamp(176px,22.5dvh,222px)!important;
   margin:0 -15px!important;
   position:relative!important;
   overflow:hidden!important;
   background:
-    linear-gradient(90deg,rgba(235,242,246,.12) 0%,rgba(247,244,238,.48) 66%,rgba(250,247,240,.78) 100%),
-    url('https://images.unsplash.com/photo-1674982046717-e5cc12a008dd?auto=format&fit=crop&fm=jpg&q=82&w=1600') center 47%/cover no-repeat!important;
-  border-bottom:1px solid rgba(12,36,52,.08)!important;
+    linear-gradient(90deg,rgba(234,242,247,.10) 0%,rgba(245,243,237,.30) 51%,rgba(250,247,240,.60) 100%),
+    url('https://images.unsplash.com/photo-1674982046717-e5cc12a008dd?auto=format&fit=crop&fm=jpg&q=82&w=1600') center 48%/cover no-repeat!important;
+  border-bottom:1px solid rgba(12,36,52,.07)!important;
 }
-.exact-approved-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(229,239,246,.38),rgba(255,248,238,.13) 70%,rgba(244,241,233,.26));pointer-events:none}
+.exact-approved-hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(227,238,246,.28),rgba(255,249,240,.04) 68%,rgba(244,240,231,.18));pointer-events:none}
 .exact-approved-hero>*{position:absolute!important;z-index:2!important}
 
-/* exact top controls */
-.exact-top-left{left:21px!important;top:16px!important;display:flex!important;gap:10px!important;direction:ltr!important;align-items:center!important}
-.exact-top-right{right:21px!important;top:16px!important;display:flex!important;gap:10px!important;direction:ltr!important;align-items:center!important}
-.exact-top-btn{width:41px!important;height:41px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.92)!important;background:rgba(255,255,255,.78)!important;color:#0d293a!important;display:grid!important;place-items:center!important;padding:0!important;box-shadow:0 5px 14px rgba(20,43,58,.06)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important}
-.exact-top-btn.profile{background:linear-gradient(145deg,#84939d,#596770)!important;color:#fff!important}
+/* Header controls — EXACT side assignment from reference: account/bell left, search/settings right. */
+.exact-top-left{left:21px!important;top:15px!important;display:flex!important;gap:10px!important;direction:ltr!important;align-items:center!important}
+.exact-top-right{right:21px!important;top:15px!important;display:flex!important;gap:10px!important;direction:ltr!important;align-items:center!important}
+.exact-top-btn{width:41px!important;height:41px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.94)!important;background:rgba(255,255,255,.82)!important;color:#0d293a!important;display:grid!important;place-items:center!important;padding:0!important;box-shadow:0 5px 14px rgba(20,43,58,.06)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;position:relative!important}
+.exact-top-btn.profile{background:linear-gradient(145deg,#89969f,#59666f)!important;color:#fff!important}
 .exact-top-btn svg{width:22px!important;height:22px!important;stroke:currentColor!important;fill:none!important;stroke-width:2!important;stroke-linecap:round!important;stroke-linejoin:round!important}
 .exact-top-btn.profile svg{fill:#fff!important;stroke:none!important;width:24px!important;height:24px!important}
 .exact-top-btn.notify b{position:absolute!important;right:-2px!important;top:-4px!important;width:18px!important;height:18px!important;border-radius:50%!important;background:#f4202b!important;color:#fff!important;border:2px solid #eef3f5!important;font-size:9px!important;display:grid!important;place-items:center!important}
 
-/* centered brand exactly as approved */
-.exact-brand{top:9px!important;left:50%!important;transform:translateX(-50%)!important;text-align:center!important;color:#092638!important;line-height:1!important;min-width:145px!important}
-.exact-brand-word{font-size:33px!important;line-height:.95!important;font-weight:950!important;letter-spacing:-1.8px!important;position:relative!important;display:inline-block!important}
-.exact-brand-mark{position:absolute!important;left:-14px!important;top:-3px!important;color:#087b72!important;font-size:24px!important;transform:rotate(-14deg)!important}
-.exact-brand-en{font-size:8px!important;font-weight:900!important;letter-spacing:4px!important;margin-top:2px!important}
+/* Centered Dalily mark. */
+.exact-brand{top:8px!important;left:50%!important;transform:translateX(-50%)!important;text-align:center!important;color:#092638!important;line-height:1!important;min-width:145px!important}
+.exact-brand-word{font-size:34px!important;line-height:.95!important;font-weight:950!important;letter-spacing:-1.9px!important;position:relative!important;display:inline-block!important}
+.exact-brand-mark{position:absolute!important;left:-14px!important;top:-4px!important;color:#087b72!important;font-size:25px!important;transform:rotate(-14deg)!important;font-weight:950!important}
+.exact-brand-en{font-size:8px!important;font-weight:900!important;letter-spacing:4.2px!important;margin-top:2px!important}
 .exact-brand-tag{font-size:10px!important;font-weight:850!important;margin-top:7px!important}
 
-/* greeting copied from the approved composition */
-.exact-greeting{right:24px!important;top:82px!important;text-align:right!important;max-width:61%!important;color:#0a2031!important;text-shadow:0 1px 0 rgba(255,255,255,.75)!important}
-.exact-greeting h2{margin:0!important;font-size:24px!important;line-height:1.15!important;font-weight:950!important;white-space:nowrap!important}
-.exact-greeting .q{margin:8px 0 0!important;font-size:16px!important;font-weight:700!important;color:#5e6570!important}
-.exact-greeting .sub{margin:5px 0 0!important;font-size:9.5px!important;line-height:1.45!important;font-weight:700!important;color:#525c64!important;white-space:nowrap!important}
-.exact-motto{left:22px!important;bottom:15px!important;display:flex!important;align-items:center!important;gap:8px!important;border-radius:15px!important;padding:7px 11px!important;background:rgba(68,64,59,.58)!important;border:1px solid rgba(255,255,255,.8)!important;color:#fff!important;font-size:9.5px!important;line-height:1.35!important;font-weight:850!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;box-shadow:0 6px 16px rgba(22,25,27,.08)!important}
-.exact-motto .bars{font-size:18px!important;line-height:1!important}
+/* Greeting composition. */
+.exact-greeting{right:24px!important;top:83px!important;text-align:right!important;max-width:62%!important;color:#0a2031!important;text-shadow:0 1px 0 rgba(255,255,255,.78)!important}
+.exact-greeting h2{margin:0!important;font-size:24px!important;line-height:1.14!important;font-weight:950!important;white-space:nowrap!important}
+.exact-greeting .q{margin:8px 0 0!important;font-size:16.5px!important;font-weight:720!important;color:#5d646e!important;white-space:nowrap!important}
+.exact-greeting .sub{margin:6px 0 0!important;font-size:9.7px!important;line-height:1.42!important;font-weight:700!important;color:#525c64!important;white-space:nowrap!important}
+.exact-motto{left:22px!important;bottom:15px!important;display:flex!important;align-items:center!important;gap:8px!important;border-radius:15px!important;padding:7px 11px!important;background:rgba(68,64,59,.60)!important;border:1px solid rgba(255,255,255,.82)!important;color:#fff!important;font-size:9.5px!important;line-height:1.35!important;font-weight:850!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;box-shadow:0 6px 16px rgba(22,25,27,.08)!important}
+.exact-motto .bars{width:22px!important;height:22px!important;display:grid!important;place-items:center!important}.exact-motto .bars svg{width:22px!important;height:22px!important;stroke:#fff!important;fill:#fff!important;stroke-width:1.8!important}
 
-/* Command cards: exact approved visual proportions */
-.approved-command-grid{gap:9px!important}
-.approved-command{height:132px!important;border-radius:17px!important;padding:14px 10px 11px!important;align-items:center!important;text-align:center!important}
+/* Cards — reference is visually LTR even though card text is Arabic. */
+.approved-command-grid{gap:9px!important;direction:ltr!important}
+.approved-command{height:132px!important;border-radius:17px!important;padding:14px 10px 11px!important;align-items:center!important;text-align:center!important;direction:rtl!important}
 .approved-icon{height:37px!important;margin-bottom:7px!important}
 .approved-icon svg{width:35px!important;height:35px!important}
-.approved-command strong{font-size:18.5px!important}
+.approved-command strong{font-size:18.5px!important;line-height:1.08!important}
 .approved-command small{font-size:9px!important;line-height:1.46!important;margin-top:6px!important}
-.approved-command i{right:11px!important;left:auto!important;bottom:9px!important;width:29px!important;height:29px!important;font-size:16px!important}
+.approved-command i{right:11px!important;left:auto!important;bottom:9px!important;width:29px!important;height:29px!important;font-size:16px!important;background:rgba(255,255,255,.17)!important}
 .approved-command.trade{background:linear-gradient(145deg,#008a7e,#00635d)!important}
 .approved-command.business{background:linear-gradient(145deg,#0b7fc0,#07578a)!important}
 .approved-command.projects{background:linear-gradient(145deg,#75438b,#562762)!important}
@@ -57,29 +58,37 @@
 .approved-command.calls{background:linear-gradient(145deg,#3a8e4a,#246c34)!important}
 .approved-command.tasks{background:linear-gradient(145deg,#ad4750,#81333c)!important}
 
-/* Stats row */
-.approved-summary{margin-top:10px!important;gap:9px!important}
-.summary-card{height:72px!important;border-radius:16px!important}
+/* Stats order visually: completed / running / overdue from left to right. */
+.approved-summary{margin-top:10px!important;gap:9px!important;direction:ltr!important}
+.summary-card{height:72px!important;border-radius:16px!important;direction:rtl!important}
 
-/* Approved activity is always one row of three cards. */
-.approved-activity{margin-top:11px!important;padding:10px 11px!important;border-radius:18px!important}
-.approved-activity .activity-list{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important}
-.approved-activity .activity-item{min-height:67px!important;max-height:72px!important}
+/* Activity: one horizontal strip of exactly three cards like the approved reference. */
+.approved-activity{margin-top:11px!important;padding:10px 11px!important;border-radius:18px!important;min-height:106px!important}
+.approved-activity .section-head{margin-bottom:6px!important}
+.approved-activity .section-head h3{font-size:15px!important}
+.approved-activity .activity-list{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;direction:rtl!important}
+.approved-activity .activity-item{min-height:67px!important;max-height:72px!important;padding:7px 8px!important}
 .approved-activity .activity-item:nth-child(n+4){display:none!important}
+.approved-activity .activity-title{font-size:8.1px!important;line-height:1.42!important}
+.approved-activity .activity-time{font-size:7px!important}
 .approved-activity .empty{min-height:67px!important;display:grid!important;place-items:center!important}
 
-/* Keep the command box visible just above the fixed bottom nav. */
-.home-command-box{margin-top:11px!important;min-height:60px!important}
+/* Input bar exactly above bottom navigation. */
+.home-command-box{margin-top:11px!important;min-height:60px!important;border-radius:17px!important}
+.home-command-copy input{font-size:14.5px!important}.home-command-copy small{font-size:7.5px!important}
 .bottom-nav{height:70px!important}
 
 @media(max-width:430px){
-  .approved-hero.exact-approved-hero{height:176px!important}
+  .approved-hero.exact-approved-hero{height:clamp(174px,22.5dvh,205px)!important}
   .exact-top-left{left:15px!important}.exact-top-right{right:15px!important}
   .exact-top-btn{width:38px!important;height:38px!important}
   .exact-brand-word{font-size:30px!important}.exact-brand-tag{font-size:9px!important}
   .exact-greeting{right:18px!important;top:80px!important;max-width:64%!important}
   .exact-greeting h2{font-size:21px!important}.exact-greeting .q{font-size:14.5px!important}.exact-greeting .sub{font-size:8.5px!important}
   .exact-motto{left:16px!important;bottom:14px!important;font-size:8.7px!important;padding:6px 9px!important}
+  .approved-command-grid{gap:7px!important}
   .approved-command{height:128px!important;padding:12px 7px 10px!important}
   .approved-command strong{font-size:17px!important}.approved-command small{font-size:8.3px!important}
+  .approved-summary{gap:7px!important}
+  .approved-activity{padding-left:9px!important;padding-right:9px!important}
 }
