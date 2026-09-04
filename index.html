@@ -6,99 +6,16 @@
 <meta name="theme-color" content="#ffffff">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<meta http-equiv="Pragma" content="no-cache">
-<meta http-equiv="Expires" content="0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"><meta http-equiv="Pragma" content="no-cache"><meta http-equiv="Expires" content="0">
 <title>دليلي — مدير أعمالك</title>
-<link rel="stylesheet" href="/dalily-v2.css?v=3">
-<link rel="stylesheet" href="/dalily-mobile-fix.css?v=3">
-<link rel="stylesheet" href="/dalily-premium-ui.css?v=1">
-<link rel="stylesheet" href="/dalily-exact-ui.css?v=1">
-<link rel="stylesheet" href="/dalily-reference-mode.css?v=1">
-<style>
-html,body,.app-shell{width:100%;max-width:100%;overflow-x:hidden!important}
-.workspace,.panel,.section,.activity-list,.activity-item,.activity-main,.content-card,.chat-card,.hero-card,.list,.item,.opp-main{min-width:0!important;max-width:100%!important}
-.activity-title,.title,.meta,.hint,.source,.execution-info strong,.execution-info span{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;text-overflow:clip!important;overflow:visible!important}
-.activity-item,.item{width:100%!important;overflow:hidden!important}
-</style>
-</head>
-<body>
-<div class="app-shell">
-<header class="topbar">
-  <div class="top-actions"><button class="icon-btn" type="button" aria-label="التنبيهات">🔔</button></div>
-  <div class="brand">دليلي</div>
-  <div class="status-pill"><span class="status-dot"></span><span>جاهز</span></div>
-</header>
-<div id="error" class="error"></div>
-<div id="user"></div><div id="feednote"></div><div id="stats"><span id="tc">0</span><span id="dc">0</span><span id="pc">0</span><span id="oc">0</span></div>
-<section id="loginView" class="login-view">
-  <div class="login-card">
-    <div class="login-logo">د</div>
-    <h1>دليلي</h1>
-    <p>مدير أعمالك الرقمي. ينفذ أوامرك ويتابع مهامك وأدواتك من مكان واحد.</p>
-    <button id="login" class="primary" type="button">الدخول بحساب Google</button>
-  </div>
-</section>
-<main id="ws" class="workspace">
-  <section id="home" class="panel active">
-    <div class="hero-card">
-      <div class="hero-avatar">👤</div>
-      <div class="hero-text"><h2>هلا أبو بندر</h2><p>كل أعمالك بترتيب واحد</p></div>
-    </div>
-    <div class="section">
-      <div class="section-head"><h3>اليوم</h3><span class="subtle">ملخص سريع</span></div>
-      <div class="today-grid">
-        <div class="metric-card"><div class="metric-icon green">✓</div><strong id="homeTasks">0</strong><span>مهام مفتوحة</span></div>
-        <div class="metric-card"><div class="metric-icon blue">▣</div><strong id="homeProjects">0</strong><span>مشاريع</span></div>
-        <div class="metric-card"><div class="metric-icon orange">⌕</div><strong id="homeOpps">0</strong><span>فرص</span></div>
-        <div class="metric-card"><div class="metric-icon purple">★</div><strong id="homeDone">0</strong><span>منجزة</span></div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-head"><h3>تنفيذ سريع</h3><span class="subtle">أمر واحد</span></div>
-      <div class="quick-grid">
-        <button class="quick-action" data-chatprompt="اتصل على " type="button"><span class="qicon">☎</span><span>اتصال</span></button>
-        <button class="quick-action" data-chatprompt="اعرض لي آخر 3 رسائل في بريدي" type="button"><span class="qicon">✉</span><span>بريد</span></button>
-        <button class="quick-action" data-goto="tasks" type="button"><span class="qicon">✓</span><span>مهمة</span></button>
-        <button class="quick-action" data-goto="opportunities" type="button"><span class="qicon">⌕</span><span>بحث</span></button>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-head"><h3>آخر التقارير</h3><button class="secondary mini" data-goto="reports" type="button">عرض الكل</button></div>
-      <div id="homeActivity" class="activity-list"><div class="empty">كل شيء هادئ الآن. أعط دليلي أول طلب.</div></div>
-    </div>
-  </section>
-
-  <section id="chat" class="panel">
-    <div class="chat-card">
-      <div class="chat-header"><div class="chat-title">محادثة دليلي</div><div id="chatState" class="chat-status">جاهز</div></div>
-      <div id="cm" class="chatbox"><div class="bubble agent">هلا أبو بندر، أنا دليلي. وش تبي أنجز لك اليوم؟</div></div>
-      <div id="lastExecution" class="execution-card">
-        <div class="execution-label">آخر تنفيذ</div>
-        <div class="execution-row"><div class="execution-icon">✓</div><div class="execution-info"><strong id="lastExecutionTitle">تنفيذ طلب</strong><span id="lastExecutionStatus">الحالة: مكتمل • الآن</span></div></div>
-      </div>
-      <div class="quick-chips">
-        <button class="chip" data-chatprompt="اتصل على " type="button">☎ اتصال</button>
-        <button class="chip" data-chatprompt="أنشئ لي موعد في التقويم " type="button">▣ جدولة</button>
-        <button class="chip" data-chatprompt="ابحث لي عن " type="button">⌕ بحث</button>
-        <button class="chip" data-chatprompt="أعطني تقرير المدير المختصر" type="button">▤ تقرير</button>
-      </div>
-      <form id="cf" class="chat-form"><textarea id="ci" maxlength="4000" placeholder="اكتب طلبك لدليلي..." required></textarea><button id="cs" class="send-btn" type="submit" aria-label="إرسال">➤</button></form>
-    </div>
-  </section>
-
-  <section id="reports" class="panel"><div class="content-card"><div class="section-head"><div><h2>التقارير</h2><div class="hint">آخر الأوامر والتنفيذات على هذا الجهاز.</div></div></div><div id="reportsList" class="activity-list" style="margin-top:14px"><div class="empty">ما فيه تنفيذات مسجلة حتى الآن.</div></div><button class="primary" data-chatprompt="أعطني تقرير المدير المختصر" type="button" style="width:100%;margin-top:14px">اطلب تقرير جديد من دليلي</button></div></section>
-  <section id="settings" class="panel"><div class="content-card"><h2>الإعدادات</h2><div class="hint">حسابك وربط أدوات دليلي.</div><div class="settings-list"><div class="settings-row"><div><strong>الحساب</strong><br><span id="accountEmail">متصل</span></div><span>Google</span></div><div class="settings-row"><div><strong>صلاحيات المدير</strong><br><span>Gmail • Calendar • Contacts • Drive • Docs</span></div><a class="settings-link" href="/api/google-connect">إعادة الربط</a></div><div class="settings-row"><div><strong>الأدوات الداخلية</strong><br><span>المهام والمشاريع والفرص</span></div><span>مفعلة</span></div></div><div class="hidden-panels-nav"><button class="mini-nav" data-goto="tasks" type="button">المهام</button><button class="mini-nav" data-goto="projects" type="button">المشاريع</button><button class="mini-nav" data-goto="opportunities" type="button">الفرص</button></div><button id="logout" class="danger" type="button" style="width:100%;margin-top:18px">تسجيل الخروج</button></div></section>
-  <section id="tasks" class="panel"><div class="content-card"><div class="section-head"><div><h2>المهام</h2><div class="hint">إضافة ومتابعة مهامك.</div></div><button class="secondary mini" data-goto="home" type="button">الرئيسية</button></div><form id="tf" class="form three"><input id="tt" placeholder="مثال: التواصل مع المورد" required><select id="tp"><option value="">بدون مشروع</option></select><button class="primary">إضافة مهمة</button></form><div id="tl" class="list"><div class="empty">لا توجد مهام بعد</div></div></div></section>
-  <section id="projects" class="panel"><div class="content-card"><div class="section-head"><div><h2>المشاريع</h2><div class="hint">مشاريعك الحالية.</div></div><button class="secondary mini" data-goto="home" type="button">الرئيسية</button></div><form id="pf" class="form"><input id="pn" placeholder="اسم المشروع" required><button class="primary">إضافة مشروع</button></form><div id="pl" class="list"><div class="empty">لا توجد مشاريع بعد</div></div></div></section>
-  <section id="opportunities" class="panel"><div class="content-card"><div class="section-head"><div><h2>الفرص الاستثمارية</h2><div class="hint">نتائج بحث دليلي والفرص المضافة يدويًا.</div></div><button class="secondary mini" data-goto="home" type="button">الرئيسية</button></div><form id="of" class="form opps"><input id="on" placeholder="اسم الفرصة" required><input id="ocat" placeholder="المجال"><input id="ocap" type="number" min="0" placeholder="رأس المال"><input id="oscore" type="number" min="0" max="100" placeholder="التقييم /100" required><button class="primary">إضافة فرصة</button></form><div class="form" style="grid-template-columns:1fr 1fr"><input id="oprofit" placeholder="الربح المحتمل"><input id="osource" placeholder="رابط المصدر https://..."></div><div class="form"><textarea id="onotes" placeholder="وصف مختصر، المخاطر، والعميل المستهدف"></textarea><span></span></div><div id="ol" class="list"><div class="empty">لا توجد فرص بعد</div></div></div></section>
-  <nav class="bottom-nav" aria-label="التنقل الرئيسي"><button class="tab active" data-tab="home" type="button"><span class="nav-icon">⌂</span><span>الرئيسية</span></button><button class="tab" data-tab="chat" type="button"><span class="nav-icon">◯</span><span>المحادثة</span></button><button class="tab" data-tab="reports" type="button"><span class="nav-icon">▤</span><span>التقارير</span></button><button class="tab" data-tab="settings" type="button"><span class="nav-icon">⚙</span><span>الإعدادات</span></button></nav>
-</main>
-</div>
-<script src="/dalily-execution-filter.js?v=4"></script>
-<script src="/dalily-premium-ui.js?v=1"></script>
-<script src="/dalily-exact-ui.js?v=1"></script>
-<script type="module" src="/dalily-v2.js?v=4"></script>
-<script src="/dalily-reference-mode.js?v=1"></script>
-</body>
-</html>
+<link rel="stylesheet" href="/dalily-v2.css?v=3"><link rel="stylesheet" href="/dalily-mobile-fix.css?v=3"><link rel="stylesheet" href="/dalily-premium-ui.css?v=1"><link rel="stylesheet" href="/dalily-exact-ui.css?v=1"><link rel="stylesheet" href="/dalily-reference-mode.css?v=20260904-5">
+<style>html,body,.app-shell{width:100%;max-width:100%;overflow-x:hidden!important}.workspace,.panel,.section,.activity-list,.activity-item,.activity-main,.content-card,.chat-card,.hero-card,.list,.item,.opp-main{min-width:0!important;max-width:100%!important}.activity-title,.title,.meta,.hint,.source,.execution-info strong,.execution-info span{white-space:normal!important;overflow-wrap:anywhere!important;word-break:break-word!important;text-overflow:clip!important;overflow:visible!important}.activity-item,.item{width:100%!important;overflow:hidden!important}</style>
+</head><body><div class="app-shell"><header class="topbar"><div class="top-actions"><button class="icon-btn" type="button">🔔</button></div><div class="brand">دليلي</div><div class="status-pill"><span class="status-dot"></span><span>جاهز</span></div></header><div id="error" class="error"></div><div id="user"></div><div id="feednote"></div><div id="stats"><span id="tc">0</span><span id="dc">0</span><span id="pc">0</span><span id="oc">0</span></div>
+<section id="loginView" class="login-view"><div class="login-card"><div class="login-logo">د</div><h1>دليلي</h1><p>مدير أعمالك الرقمي. ينفذ أوامرك ويتابع مهامك وأدواتك من مكان واحد.</p><button id="login" class="primary" type="button">الدخول بحساب Google</button></div></section>
+<main id="ws" class="workspace"><section id="home" class="panel active"><div class="hero-card"><div class="hero-avatar">👤</div><div class="hero-text"><h2>هلا أبو بندر</h2><p>كل أعمالك بترتيب واحد</p></div></div><div class="section"><div class="section-head"><h3>اليوم</h3><span class="subtle">ملخص سريع</span></div><div class="today-grid"><div class="metric-card"><div class="metric-icon green">✓</div><strong id="homeTasks">0</strong><span>مهام مفتوحة</span></div><div class="metric-card"><div class="metric-icon blue">▣</div><strong id="homeProjects">0</strong><span>مشاريع</span></div><div class="metric-card"><div class="metric-icon orange">⌕</div><strong id="homeOpps">0</strong><span>فرص</span></div><div class="metric-card"><div class="metric-icon purple">★</div><strong id="homeDone">0</strong><span>منجزة</span></div></div></div><div class="section"><div class="section-head"><h3>تنفيذ سريع</h3><span class="subtle">أمر واحد</span></div><div class="quick-grid"><button class="quick-action" data-chatprompt="اتصل على " type="button"><span class="qicon">☎</span><span>اتصال</span></button><button class="quick-action" data-chatprompt="اعرض لي آخر 3 رسائل في بريدي" type="button"><span class="qicon">✉</span><span>بريد</span></button><button class="quick-action" data-goto="tasks" type="button"><span class="qicon">✓</span><span>مهمة</span></button><button class="quick-action" data-goto="opportunities" type="button"><span class="qicon">⌕</span><span>بحث</span></button></div></div><div class="section"><div class="section-head"><h3>آخر التقارير</h3><button class="secondary mini" data-goto="reports" type="button">عرض الكل</button></div><div id="homeActivity" class="activity-list"><div class="empty">كل شيء هادئ الآن. أعط دليلي أول طلب.</div></div></div></section>
+<section id="chat" class="panel"><div class="chat-card"><div class="chat-header"><div class="chat-title">محادثة دليلي</div><div id="chatState" class="chat-status">جاهز</div></div><div id="cm" class="chatbox"><div class="bubble agent">هلا أبو بندر، أنا دليلي. وش تبي أنجز لك اليوم؟</div></div><div id="lastExecution" class="execution-card"><div class="execution-label">آخر تنفيذ</div><div class="execution-row"><div class="execution-icon">✓</div><div class="execution-info"><strong id="lastExecutionTitle">تنفيذ طلب</strong><span id="lastExecutionStatus">الحالة: مكتمل • الآن</span></div></div></div><div class="quick-chips"><button class="chip" data-chatprompt="اتصل على " type="button">☎ اتصال</button><button class="chip" data-chatprompt="أنشئ لي موعد في التقويم " type="button">▣ جدولة</button><button class="chip" data-chatprompt="ابحث لي عن " type="button">⌕ بحث</button><button class="chip" data-chatprompt="أعطني تقرير المدير المختصر" type="button">▤ تقرير</button></div><form id="cf" class="chat-form"><textarea id="ci" maxlength="4000" placeholder="اكتب طلبك لدليلي..." required></textarea><button id="cs" class="send-btn" type="submit">➤</button></form></div></section>
+<section id="reports" class="panel"><div class="content-card"><div class="section-head"><div><h2>التقارير</h2><div class="hint">آخر الأوامر والتنفيذات على هذا الجهاز.</div></div></div><div id="reportsList" class="activity-list"><div class="empty">ما فيه تنفيذات مسجلة حتى الآن.</div></div><button class="primary" data-chatprompt="أعطني تقرير المدير المختصر" type="button">اطلب تقرير جديد من دليلي</button></div></section>
+<section id="settings" class="panel"><div class="content-card"><h2>الإعدادات</h2><div class="hint">حسابك وربط أدوات دليلي.</div><div class="settings-list"><div class="settings-row"><div><strong>الحساب</strong><br><span id="accountEmail">متصل</span></div><span>Google</span></div><div class="settings-row"><div><strong>صلاحيات المدير</strong><br><span>Gmail • Calendar • Contacts • Drive • Docs</span></div><a class="settings-link" href="/api/google-connect">إعادة الربط</a></div></div><button id="logout" class="danger" type="button">تسجيل الخروج</button></div></section>
+<section id="tasks" class="panel"><div class="content-card"><h2>المهام</h2><form id="tf" class="form three"><input id="tt" required><select id="tp"><option value="">بدون مشروع</option></select><button class="primary">إضافة مهمة</button></form><div id="tl" class="list"><div class="empty">لا توجد مهام بعد</div></div></div></section><section id="projects" class="panel"><div class="content-card"><h2>المشاريع</h2><form id="pf" class="form"><input id="pn" required><button class="primary">إضافة مشروع</button></form><div id="pl" class="list"><div class="empty">لا توجد مشاريع بعد</div></div></div></section><section id="opportunities" class="panel"><div class="content-card"><h2>الفرص الاستثمارية</h2><form id="of" class="form opps"><input id="on" required><input id="ocat"><input id="ocap" type="number"><input id="oscore" type="number" required><button class="primary">إضافة فرصة</button></form><input id="oprofit"><input id="osource"><textarea id="onotes"></textarea><div id="ol" class="list"><div class="empty">لا توجد فرص بعد</div></div></div></section>
+<nav class="bottom-nav"><button class="tab active" data-tab="home" type="button"><span class="nav-icon">⌂</span><span>الرئيسية</span></button><button class="tab" data-tab="chat" type="button"><span class="nav-icon">◯</span><span>المحادثة</span></button><button class="tab" data-tab="reports" type="button"><span class="nav-icon">▤</span><span>التقارير</span></button><button class="tab" data-tab="settings" type="button"><span class="nav-icon">⚙</span><span>الإعدادات</span></button></nav></main></div>
+<script src="/dalily-execution-filter.js?v=4"></script><script src="/dalily-premium-ui.js?v=1"></script><script src="/dalily-exact-ui.js?v=1"></script><script type="module" src="/dalily-v2.js?v=4"></script><script src="/dalily-reference-mode.js?v=20260904-5"></script></body></html>
