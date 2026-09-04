@@ -1,4 +1,4 @@
-// Dalily approved dashboard layout. Loaded before dalily-v2.js so native handlers bind to the final DOM.
+// Dalily — approved mockup match. Loaded before dalily-v2.js so native handlers bind to final DOM.
 (()=>{
   const home=document.getElementById('home');
   const nav=document.querySelector('.bottom-nav');
@@ -6,26 +6,33 @@
   const workspace=document.getElementById('ws');
   if(!home||!nav||!topbar||!workspace)return;
 
-  // Add panels used by the approved navigation before the main app binds handlers.
+  const svg={
+    user:`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c.8-5 3.6-7 8-7s7.2 2 8 7z"/></svg>`,
+    bell:`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9"/><path d="M10 21h4"/></svg>`,
+    search:`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>`,
+    gear:`<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.8 1.8 0 0 0 .36 1.98l.06.06-2.83 2.83-.06-.06A1.8 1.8 0 0 0 15 19.4a1.8 1.8 0 0 0-1.08 1.65V21h-4v-.08A1.8 1.8 0 0 0 8.85 19.3a1.8 1.8 0 0 0-1.98.36l-.06.06-2.83-2.83.06-.06A1.8 1.8 0 0 0 4.4 15a1.8 1.8 0 0 0-1.65-1.08H2v-4h.08A1.8 1.8 0 0 0 3.7 8.85a1.8 1.8 0 0 0-.36-1.98l-.06-.06 2.83-2.83.06.06A1.8 1.8 0 0 0 8.15 4.4 1.8 1.8 0 0 0 9.23 2.75V2h4v.08A1.8 1.8 0 0 0 14.3 3.7a1.8 1.8 0 0 0 1.98-.36l.06-.06 2.83 2.83-.06.06a1.8 1.8 0 0 0-.36 1.98 1.8 1.8 0 0 0 1.65 1.08H21v4h-.08A1.8 1.8 0 0 0 19.4 15z"/></svg>`,
+    trade:`<svg viewBox="0 0 48 48"><path d="M7 37h7V27H7zM20 37h7V20h-7zM33 37h7V12h-7z"/><path d="m8 22 10-8 8 5 13-12"/><path d="M34 7h5v5"/></svg>`,
+    business:`<svg viewBox="0 0 48 48"><rect x="12" y="7" width="24" height="34" rx="3"/><path d="m17 15 2 2 4-4M17 23l2 2 4-4M17 31l2 2 4-4M27 15h5M27 23h5M27 31h5"/></svg>`,
+    projects:`<svg class="fill" viewBox="0 0 48 48"><path d="M7 40V18l17-11 17 11v22H29V27H19v13z"/></svg>`,
+    clients:`<svg class="fill" viewBox="0 0 48 48"><circle cx="24" cy="16" r="7"/><circle cx="10" cy="20" r="5"/><circle cx="38" cy="20" r="5"/><path d="M12 40c1-9 5-14 12-14s11 5 12 14zM1 39c1-7 4-11 9-11 3 0 5 1 7 4-1 2-2 4-2 7zM47 39c-1-7-4-11-9-11-3 0-5 1-7 4 1 2 2 4 2 7z"/></svg>`,
+    phone:`<svg class="fill" viewBox="0 0 48 48"><path d="M11 5c3-2 7 5 8 9l-5 4c3 7 8 12 15 15l4-5c4 1 11 5 9 8-2 5-7 8-12 7C17 40 8 31 5 18 4 13 6 7 11 5z"/></svg>`,
+    tasks:`<svg viewBox="0 0 48 48"><rect x="8" y="10" width="32" height="30" rx="4"/><path d="M15 6v8M33 6v8M8 18h32M15 24h5M28 24h5M15 31h5M28 31h5"/></svg>`,
+    home:`<svg viewBox="0 0 24 24"><path d="m3 11 9-8 9 8"/><path d="M5 10v10h14V10"/></svg>`,
+    chat:`<svg viewBox="0 0 24 24"><path d="M4 4h16v12H8l-4 4z"/></svg>`,
+    star:`<svg viewBox="0 0 24 24"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17.3 6.4 20.2 7.5 14 3 9.6l6.2-.9z"/></svg>`,
+    reports:`<svg viewBox="0 0 24 24"><path d="M5 20V10M12 20V4M19 20v-7"/></svg>`,
+    account:`<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1-5 3.6-7 8-7s7 2 8 7"/></svg>`
+  };
+
   let clients=document.getElementById('clients');
-  if(!clients){
-    clients=document.createElement('section');
-    clients.id='clients';
-    clients.className='panel';
-    nav.before(clients);
-  }
+  if(!clients){clients=document.createElement('section');clients.id='clients';clients.className='panel';nav.before(clients)}
   let favorites=document.getElementById('favorites');
-  if(!favorites){
-    favorites=document.createElement('section');
-    favorites.id='favorites';
-    favorites.className='panel';
-    nav.before(favorites);
-  }
+  if(!favorites){favorites=document.createElement('section');favorites.id='favorites';favorites.className='panel';nav.before(favorites)}
 
   topbar.innerHTML=`
     <div class="topbar-side topbar-left">
-      <button class="profile-button" data-goto="settings" type="button" aria-label="حسابي"><span>👤</span></button>
-      <button class="notify-button" type="button" aria-label="التنبيهات"><span>♧</span><b>3</b></button>
+      <button class="profile-button" data-goto="settings" type="button" aria-label="حسابي">${svg.user}</button>
+      <button class="notify-button" type="button" aria-label="التنبيهات">${svg.bell}<b>3</b></button>
     </div>
     <div class="dalily-brand" aria-label="دليلي">
       <div class="dalily-word">دليلي<span class="dalily-mark">›</span></div>
@@ -33,8 +40,8 @@
       <div class="dalily-tagline">مدير أعمالك الذكي</div>
     </div>
     <div class="topbar-side topbar-right">
-      <button class="round-action" data-chatprompt="ابحث لي عن " type="button" aria-label="بحث">⌕</button>
-      <button class="round-action" data-goto="settings" type="button" aria-label="الإعدادات">⚙</button>
+      <button class="round-action" data-chatprompt="ابحث لي عن " type="button" aria-label="بحث">${svg.search}</button>
+      <button class="round-action" data-goto="settings" type="button" aria-label="الإعدادات">${svg.gear}</button>
     </div>`;
 
   home.innerHTML=`
@@ -48,18 +55,19 @@
     </section>
 
     <section class="approved-command-grid" aria-label="الأوامر الرئيسية">
-      <button class="approved-command trade" data-premium-run="ابحث الآن في الويب عن أفضل 3 فرص تجارية واستثمارية قابلة للتنفيذ الآن. ابدأ بالفرص منخفضة التكلفة وتحت 1000 ريال إن وجدت، وركز على السعودية وخصوصاً جدة والطائف أو الفرص الرقمية. رتّبها من الأفضل، ولكل فرصة أعطني التكلفة المتوقعة والربح المحتمل والمخاطر وسبب اختيارها وأول خطوة عملية، ثم دعني أختار منها." type="button"><span class="approved-icon">↗</span><strong>التجارة</strong><small>البحث عن فرص استثمارية<br>وتنفيذها</small><i>←</i></button>
-      <button class="approved-command business" data-goto="tasks" type="button"><span class="approved-icon">☷</span><strong>الأعمال</strong><small>مهامك اليومية<br>ومتابعة التنفيذ</small><i>←</i></button>
-      <button class="approved-command projects" data-goto="projects" type="button"><span class="approved-icon">⌂</span><strong>المشاريع</strong><small>جميع مشاريعك<br>في مكان واحد</small><i>←</i></button>
-      <button class="approved-command clients" data-goto="clients" type="button"><span class="approved-icon">♟</span><strong>العملاء</strong><small>إدارة العملاء<br>والمتابعات</small><i>←</i></button>
-      <button class="approved-command calls" data-chatprompt="اتصل على " type="button"><span class="approved-icon">☎</span><strong>اتصل</strong><small>دليلي يتصل بالعميل<br>ويعطيك تقرير</small><i>←</i></button>
-      <button class="approved-command tasks" data-goto="tasks" type="button"><span class="approved-icon">▦</span><strong>مهامي</strong><small>المهام والمواعيد<br>والتذكيرات</small><i>←</i></button>
+      <button class="approved-command trade" data-premium-run="ابحث الآن في الويب عن أفضل 3 فرص تجارية واستثمارية قابلة للتنفيذ الآن. ابدأ بالفرص منخفضة التكلفة وتحت 1000 ريال إن وجدت، وركز على السعودية وخصوصاً جدة والطائف أو الفرص الرقمية. رتّبها من الأفضل، ولكل فرصة أعطني التكلفة المتوقعة والربح المحتمل والمخاطر وسبب اختيارها وأول خطوة عملية، ثم دعني أختار منها." type="button"><span class="approved-icon">${svg.trade}</span><strong>التجارة</strong><small>البحث عن فرص استثمارية<br>وتنفيذها</small><i>→</i></button>
+      <button class="approved-command business" data-goto="tasks" type="button"><span class="approved-icon">${svg.business}</span><strong>الأعمال</strong><small>مهامك اليومية<br>ومتابعة التنفيذ</small><i>→</i></button>
+      <button class="approved-command projects" data-goto="projects" type="button"><span class="approved-icon">${svg.projects}</span><strong>المشاريع</strong><small>جميع مشاريعك<br>في مكان واحد</small><i>→</i></button>
+
+      <button class="approved-command tasks" data-goto="tasks" type="button"><span class="approved-icon">${svg.tasks}</span><strong>مهامي</strong><small>المهام والمواعيد<br>والتذكيرات</small><i>→</i></button>
+      <button class="approved-command calls" data-chatprompt="اتصل على " type="button"><span class="approved-icon">${svg.phone}</span><strong>اتصل</strong><small>دليلي يتصل بالعميل<br>ويعطيك تقرير</small><i>→</i></button>
+      <button class="approved-command clients" data-goto="clients" type="button"><span class="approved-icon">${svg.clients}</span><strong>العملاء</strong><small>إدارة العملاء<br>والمتابعات</small><i>→</i></button>
     </section>
 
     <section class="approved-summary" aria-label="ملخص المهام">
-      <div class="summary-card done"><span class="summary-symbol">✓</span><strong id="homeDone">0</strong><div><b>مهام مكتملة</b><small>هذا الأسبوع</small></div></div>
-      <div class="summary-card running"><span class="summary-symbol">◷</span><strong id="homeTasks">0</strong><div><b>مهام قيد التنفيذ</b><small>بانتظار المتابعة</small></div></div>
       <div class="summary-card late"><span class="summary-symbol">!</span><strong id="homeAttention">0</strong><div><b>مهام متأخرة</b><small>تحتاج قرارك</small></div></div>
+      <div class="summary-card running"><span class="summary-symbol">◷</span><strong id="homeTasks">0</strong><div><b>مهام قيد التنفيذ</b><small>بانتظار المتابعة</small></div></div>
+      <div class="summary-card done"><span class="summary-symbol">✓</span><strong id="homeDone">0</strong><div><b>مهام مكتملة</b><small>هذا الأسبوع</small></div></div>
     </section>
 
     <section class="approved-activity section">
@@ -97,14 +105,13 @@
     </div>`;
 
   nav.innerHTML=`
-    <button class="tab active" data-tab="home" type="button"><span class="nav-icon">⌂</span><span>الرئيسية</span></button>
-    <button class="tab" data-tab="chat" type="button"><span class="nav-icon">▢</span><span>المحادثة</span></button>
-    <button class="tab" data-tab="favorites" type="button"><span class="nav-icon">☆</span><span>المفضلة</span></button>
-    <button class="tab" data-tab="reports" type="button"><span class="nav-icon">▥</span><span>التقارير</span></button>
-    <button class="tab" data-tab="settings" type="button"><span class="nav-icon">♙</span><span>حسابي</span></button>`;
+    <button class="tab active" data-tab="home" type="button"><span class="nav-icon">${svg.home}</span><span>الرئيسية</span></button>
+    <button class="tab" data-tab="chat" type="button"><span class="nav-icon">${svg.chat}</span><span>المحادثة</span></button>
+    <button class="tab" data-tab="favorites" type="button"><span class="nav-icon">${svg.star}</span><span>المفضلة</span></button>
+    <button class="tab" data-tab="reports" type="button"><span class="nav-icon">${svg.reports}</span><span>التقارير</span></button>
+    <button class="tab" data-tab="settings" type="button"><span class="nav-icon">${svg.account}</span><span>حسابي</span></button>`;
 
-  const tasks=document.getElementById('tasks');
-  const projects=document.getElementById('projects');
+  const tasks=document.getElementById('tasks'),projects=document.getElementById('projects');
   function tabs(active){return `<div class="work-tabs"><button class="work-tab ${active==='tasks'?'active':''}" data-goto="tasks" type="button">الأعمال</button><button class="work-tab ${active==='projects'?'active':''}" data-goto="projects" type="button">المشاريع</button></div>`}
   tasks?.querySelector('.content-card')?.insertAdjacentHTML('afterbegin',tabs('tasks'));
   projects?.querySelector('.content-card')?.insertAdjacentHTML('afterbegin',tabs('projects'));
@@ -115,13 +122,11 @@
   }
   document.querySelectorAll('[data-premium-run]').forEach(button=>button.addEventListener('click',()=>runPrompt(button.dataset.premiumRun||'')));
 
-  const homeInput=document.getElementById('homeCommand');
-  const homeSend=document.getElementById('homeCommandSend');
+  const homeInput=document.getElementById('homeCommand'),homeSend=document.getElementById('homeCommandSend');
   const submitHome=()=>{const value=homeInput?.value.trim();if(value)runPrompt(value)};
   homeSend?.addEventListener('click',submitHome);
   homeInput?.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitHome()}});
 
-  // There is no due-date field in the current task model yet; keep overdue at zero until it is added.
   const attention=document.getElementById('homeAttention');
   if(attention)attention.textContent='0';
 })();
