@@ -37,8 +37,8 @@
 
     async function loadApprovedReference(){
       try{
-        const stamp='20260904-exact-3';
-        const files=['0','1','2a','2b','2c','2d','3','4','5','6'];
+        const stamp='20260904-exact-4';
+        const files=['0','1a','1b','1c','1d','2a','2b','2c','2d','3','4','5','6'];
         const parts=await Promise.all(files.map(async part=>{
           const res=await fetch(`/dalily-ref-${part}.txt?v=${stamp}`,{cache:'no-store'});
           if(!res.ok)throw new Error(`ref ${part}: ${res.status}`);
