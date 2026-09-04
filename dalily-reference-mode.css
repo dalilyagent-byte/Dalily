@@ -1,19 +1,16 @@
-/* Dalily — reference-image home mode. Visual source is the approved reference only. */
+/* Dalily — exact approved reference home. Preserve the approved artwork ratio on iPhone/PWA; never stretch or crop it. */
 .reference-home-screen{position:fixed;z-index:2147483646;left:0;right:0;top:0;bottom:0;width:100%;height:100%;background:#fff;display:none;overflow:hidden;touch-action:manipulation}
 .reference-home-screen.is-visible{display:block}
-.reference-home-screen .reference-home-img{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.reference-home-screen .reference-home-img{position:absolute;left:50%;top:0;width:auto;height:100%;max-width:100%;object-fit:contain;object-position:top center;transform:translateX(-50%);display:block;user-select:none;-webkit-user-drag:none;pointer-events:none}
 .reference-hotspot{position:absolute;border:0!important;background:transparent!important;padding:0!important;margin:0!important;box-shadow:none!important;outline:0!important;z-index:2;-webkit-tap-highlight-color:transparent}
 .reference-hotspot:active{background:rgba(0,0,0,.03)!important}
-/* Header */
 .ref-profile{left:1.8%;top:1.2%;width:9.5%;height:7.5%}.ref-bell{left:10.5%;top:1.2%;width:9.5%;height:7.5%}.ref-search{left:82%;top:1.2%;width:9%;height:7.5%}.ref-settings{left:91%;top:1.2%;width:8.5%;height:7.5%}
-/* Main command cards */
 .ref-trade{left:2.3%;top:22.0%;width:31.5%;height:17.2%}.ref-business{left:34.0%;top:22.0%;width:31.5%;height:17.2%}.ref-projects{left:66.0%;top:22.0%;width:31.5%;height:17.2%}
 .ref-clients{left:2.3%;top:39.7%;width:31.5%;height:17.2%}.ref-calls{left:34.0%;top:39.7%;width:31.5%;height:17.2%}.ref-tasks{left:66.0%;top:39.7%;width:31.5%;height:17.2%}
-/* Summary / activity / command */
 .ref-summary{left:2.3%;top:57.5%;width:95.4%;height:10.6%}.ref-activity{left:2.3%;top:68.6%;width:95.4%;height:15.6%}.ref-command{left:2.3%;top:84.8%;width:95.4%;height:7.6%}
-/* Bottom nav image: visually left-to-right account, reports, favorites, chat, home */
 .ref-nav-account{left:0;bottom:0;width:20%;height:7.4%}.ref-nav-reports{left:20%;bottom:0;width:20%;height:7.4%}.ref-nav-favorites{left:40%;bottom:0;width:20%;height:7.4%}.ref-nav-chat{left:60%;bottom:0;width:20%;height:7.4%}.ref-nav-home{left:80%;bottom:0;width:20%;height:7.4%}
 body.reference-home-active .bottom-nav,body.reference-home-active .topbar{visibility:hidden!important;pointer-events:none!important}
 body.reference-home-active{overflow:hidden!important;background:#fff!important}
 body.reference-home-active #ws{overflow:hidden!important}
+@supports(padding-top:env(safe-area-inset-top)){.reference-home-screen{top:env(safe-area-inset-top);height:calc(100% - env(safe-area-inset-top) - env(safe-area-inset-bottom));bottom:auto}}
 @media(min-width:761px){.reference-home-screen{left:50%;right:auto;width:760px;transform:translateX(-50%)}}
