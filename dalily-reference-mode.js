@@ -1,18 +1,22 @@
 // Dalily — exact approved reference-image home mode.
 (()=>{
   const READY=()=>new Promise(r=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',r,{once:true}):r());
-
   READY().then(()=>{
     const home=document.getElementById('home');
     const ws=document.getElementById('ws');
     const login=document.getElementById('loginView');
     if(!home||!ws)return;
-
     const screen=document.createElement('div');
     screen.className='reference-home-screen';
     screen.setAttribute('aria-label','واجهة دليلي الرئيسية المعتمدة');
     screen.innerHTML=`
       <img class="reference-home-img" alt="واجهة دليلي المعتمدة">
+      <div class="reference-exact-header">
+        <div class="ref-h-profile">●</div><div class="ref-h-bell">♧</div><div class="ref-h-search">⌕</div><div class="ref-h-settings">⚙</div>
+        <div class="ref-h-logo">دليلي<small>DALILY</small><span>مدير أعمالك الذكي</span></div>
+        <div class="ref-h-greet"><b>مرحباً أبو بندر 👋</b><strong>وش تبي نسوي اليوم؟</strong><p>أنا هنا لأدير أعمالك وأوفر لك الفرص وأنفذ مهامك</p></div>
+        <div class="ref-h-badge">▥ &nbsp; خطوة صغيرة<br>لنتائج كبيرة</div>
+      </div>
       <button class="reference-hotspot ref-profile" data-ref-action="settings" aria-label="حسابي"></button>
       <button class="reference-hotspot ref-bell" data-ref-action="bell" aria-label="التنبيهات"></button>
       <button class="reference-hotspot ref-search" data-ref-action="search" aria-label="بحث"></button>
@@ -32,57 +36,33 @@
       <button class="reference-hotspot ref-nav-chat" data-ref-action="chat" aria-label="المحادثة"></button>
       <button class="reference-hotspot ref-nav-home" data-ref-action="home" aria-label="الرئيسية"></button>`;
     document.body.appendChild(screen);
-
     const image=screen.querySelector('.reference-home-img');
-
     async function loadApprovedReference(){
       try{
-        const stamp='20260904-exact-7';
+        const stamp='20260904-exact-8';
         const files=['0','1a','1b','1c','1d','2a','2b','2c','2d','3','4','5','6'];
         const parts=await Promise.all(files.map(async part=>{
           const res=await fetch(`/dalily-ref-${part}.txt?v=${stamp}`,{cache:'no-store'});
           if(!res.ok)throw new Error(`ref ${part}: ${res.status}`);
           return (await res.text()).trim();
         }));
-        image.onload=()=>{
-          screen.classList.add('reference-ready');
-          syncVisibility();
-        };
+        image.onload=()=>{screen.classList.add('reference-ready');syncVisibility();};
         image.onerror=()=>console.error('Dalily approved reference could not be decoded');
         image.src='data:image/webp;base64,'+parts.join('');
-      }catch(err){
-        console.error('Dalily approved reference load failed',err);
-      }
+      }catch(err){console.error('Dalily approved reference load failed',err);}
     }
-
     function workspaceIsOpen(){
       const wsStyle=getComputedStyle(ws);
       const loginStyle=login?getComputedStyle(login):null;
       return wsStyle.display!=='none' && (!loginStyle || loginStyle.display==='none');
     }
-
     function syncVisibility(){
       const show=screen.classList.contains('reference-ready') && home.classList.contains('active') && workspaceIsOpen();
       screen.classList.toggle('is-visible',show);
       document.body.classList.toggle('reference-home-active',show);
     }
-
-    function clickSelector(selector){
-      const el=document.querySelector(selector);
-      if(!el)return false;
-      el.click();
-      setTimeout(syncVisibility,0);
-      return true;
-    }
-
-    function openChatWithPrompt(prompt=''){
-      if(!clickSelector('.tab[data-tab="chat"]')) clickSelector('[data-goto="chat"]');
-      setTimeout(()=>{
-        const input=document.getElementById('ci');
-        if(input){input.value=prompt;input.focus();}
-      },30);
-    }
-
+    function clickSelector(selector){const el=document.querySelector(selector);if(!el)return false;el.click();setTimeout(syncVisibility,0);return true;}
+    function openChatWithPrompt(prompt=''){if(!clickSelector('.tab[data-tab="chat"]'))clickSelector('[data-goto="chat"]');setTimeout(()=>{const input=document.getElementById('ci');if(input){input.value=prompt;input.focus();}},30);}
     function perform(action){
       switch(action){
         case 'home': syncVisibility(); break;
@@ -97,17 +77,9 @@
         case 'clients': clickSelector('#home .approved-command.clients'); break;
         case 'calls': clickSelector('#home .approved-command.calls'); break;
         case 'tasks': clickSelector('#home .approved-command.tasks'); break;
-        case 'bell': break;
       }
     }
-
-    screen.addEventListener('click',e=>{
-      const hit=e.target.closest('[data-ref-action]');
-      if(!hit)return;
-      e.preventDefault();
-      perform(hit.dataset.refAction);
-    });
-
+    screen.addEventListener('click',e=>{const hit=e.target.closest('[data-ref-action]');if(!hit)return;e.preventDefault();perform(hit.dataset.refAction);});
     const obs=new MutationObserver(syncVisibility);
     obs.observe(home,{attributes:true,attributeFilter:['class','style']});
     obs.observe(ws,{attributes:true,attributeFilter:['class','style','hidden']});
@@ -115,7 +87,6 @@
     document.addEventListener('click',()=>setTimeout(syncVisibility,0),true);
     window.addEventListener('pageshow',syncVisibility);
     window.addEventListener('resize',syncVisibility);
-
     loadApprovedReference();
     syncVisibility();
   });
