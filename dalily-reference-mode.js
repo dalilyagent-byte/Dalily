@@ -37,29 +37,19 @@
 
     async function loadApprovedReference(){
       try{
-        const stamp='20260904-exact-4';
+        const stamp='20260904-exact-7';
         const files=['0','1a','1b','1c','1d','2a','2b','2c','2d','3','4','5','6'];
         const parts=await Promise.all(files.map(async part=>{
           const res=await fetch(`/dalily-ref-${part}.txt?v=${stamp}`,{cache:'no-store'});
           if(!res.ok)throw new Error(`ref ${part}: ${res.status}`);
           return (await res.text()).trim();
         }));
-        const source=new Image();
-        source.onload=()=>{
-          const cropTop=Math.round(source.naturalHeight*0.037);
-          const canvas=document.createElement('canvas');
-          canvas.width=source.naturalWidth;
-          canvas.height=source.naturalHeight-cropTop;
-          const ctx=canvas.getContext('2d',{alpha:false});
-          ctx.drawImage(source,0,cropTop,source.naturalWidth,canvas.height,0,0,canvas.width,canvas.height);
-          image.onload=()=>{
-            screen.classList.add('reference-ready');
-            syncVisibility();
-          };
-          image.src=canvas.toDataURL('image/webp',0.98);
+        image.onload=()=>{
+          screen.classList.add('reference-ready');
+          syncVisibility();
         };
-        source.onerror=()=>console.error('Dalily approved reference could not be decoded');
-        source.src='data:image/webp;base64,'+parts.join('');
+        image.onerror=()=>console.error('Dalily approved reference could not be decoded');
+        image.src='data:image/webp;base64,'+parts.join('');
       }catch(err){
         console.error('Dalily approved reference load failed',err);
       }
