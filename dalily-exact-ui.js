@@ -34,7 +34,6 @@
     </div>
     <div class="exact-motto"><span class="bars">${svg.bars}</span><span>خطوة صغيرة<br>لنتائج كبيرة</span></div>`;
 
-  // Reference order is visually left-to-right: التجارة، الأعمال، المشاريع / العملاء، اتصل، مهامي.
   const grid=home.querySelector('.approved-command-grid');
   if(grid){
     const byClass=name=>grid.querySelector(`.approved-command.${name}`);
@@ -43,14 +42,21 @@
     });
   }
 
-  // Keep the approved three-stat order: مكتملة، قيد التنفيذ، متأخرة (left → right).
   const summary=home.querySelector('.approved-summary');
   if(summary){
     const done=summary.querySelector('.done'), running=summary.querySelector('.running'), late=summary.querySelector('.late');
     [done,running,late].forEach(el=>el&&summary.appendChild(el));
   }
 
-  // The reference shows only the latest three activities on the home screen.
   const activity=home.querySelector('#homeActivity');
   if(activity) activity.setAttribute('data-reference-limit','3');
+
+  // Load the final approved-reference lock after all prior UI styles, preventing older rules from drifting the approved design.
+  if(!document.querySelector('link[data-dalily-reference-lock]')){
+    const link=document.createElement('link');
+    link.rel='stylesheet';
+    link.href='/dalily-reference-lock.css?v=1';
+    link.dataset.dalilyReferenceLock='1';
+    document.head.appendChild(link);
+  }
 })();
