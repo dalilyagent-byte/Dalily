@@ -33,8 +33,40 @@ function isExplicitCommand(text = '') {
   return /^(?:اتصل|ارسل|أرسل|سو|سوي|نفذ|نفّذ|ابدأ|ابدا|أنشئ|انشئ|أضف|اضف|احذف|حذف|عدّل|عدل|غيّر|غير|احجز|سجل|سجّل|ذكّرني|ذكرني|اكتب|جهز|جهّز|اعتمد|فعّل|فعل|اطلب|حوّل|حول)\b/i.test(q);
 }
 
+function isShortContinuation(text = '') {
+  return /^(?:يلا|كمل|كمّل|استمر|واصل|تابع|تمام|اوكي|أوكي|ايه|إيه|ابدأ|ابدا|نفذ|نفّذ|سوها|سوه)$/i.test(String(text).trim());
+}
+
+function previousContext(req) {
+  const h = Array.isArray(req.body?.history) ? req.body.history : [];
+  for (let i = h.length - 1; i >= 0; i--) {
+    const m = h[i];
+    if (m?.role === 'user' && typeof m?.content === 'string' && !isShortContinuation(m.content)) return m.content.trim();
+  }
+  const ms = Array.isArray(req.body?.messages) ? req.body.messages : [];
+  for (let i = ms.length - 2; i >= 0; i--) {
+    const m = ms[i];
+    if (m?.role === 'user' && typeof m?.text === 'string' && !isShortContinuation(m.text)) return m.text.trim();
+  }
+  return '';
+}
+
+function enrichContinuation(req) {
+  const latest = latestUserText(req);
+  if (!isShortContinuation(latest)) return latest;
+  const prev = previousContext(req);
+  if (!prev) return latest;
+  const expanded = `تابع ونفذ آخر طلب للمستخدم دون أن تطلب منه إعادة الكلام. آخر طلب واضح كان: ${prev}`;
+  if (typeof req.body?.message === 'string') req.body.message = expanded;
+  if (Array.isArray(req.body?.messages) && req.body.messages.length) {
+    const last = req.body.messages.length - 1;
+    if (req.body.messages[last]?.role === 'user') req.body.messages[last] = { ...req.body.messages[last], text: expanded };
+  }
+  return expanded;
+}
+
 function shouldStayConversational(text = '') {
-  return looksLikeQuestion(text) && !isExplicitCommand(text);
+  return (looksLikeQuestion(text) || isShortContinuation(text)) && !isExplicitCommand(text);
 }
 
 function conversationInput(req) {
@@ -63,13 +95,13 @@ async function textOnlyReply(req) {
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
         model: 'gpt-5.6-terra',
-        instructions: 'أنت دليلي، مدير أعمال أبو بندر الرقمي. المستخدم يسأل أو يستفسر فقط. جاوب على السؤال مباشرة بلهجة سعودية طبيعية وبشكل عملي ومختصر. لا تستخدم أي أداة ولا تنفذ أي إجراء ولا تحول السؤال إلى مهمة. إذا سأل: وش عندنا اليوم؟ أعطه ملخص اليوم أو اطلب منه تحديد المقصود فقط إذا لم يوجد سياق كافٍ.',
+        instructions: 'أنت دليلي، مدير أعمال أبو بندر الرقمي. افهم سياق المحادثة ولا تتعامل مع كلمات مثل يلا وكمل واستمر كرسائل مستقلة؛ اعتبرها أمراً بمتابعة آخر طلب واضح. جاوب مباشرة بلهجة سعودية طبيعية وبشكل عملي ومختصر. لا تدّع أنك نفذت شيئاً لم تنفذه فعلاً. مهم جداً: لا تعد المستخدم بأنك ستسلمه تقريراً أو نتيجة في يوم أو وقت مستقبلي إلا إذا تم إنشاء جدولة فعلية قابلة للتنفيذ. إذا لم توجد جدولة فعلية، قل بوضوح إنك تقدر تنجز الطلب الآن ولا تعد بموعد لاحق.',
         input,
         reasoning: { effort: 'low' },
         max_output_tokens: 700,
         store: false
       }),
-      signal: AbortSignal.timeout(30000)
+      signal: AbortSignal.timeout(14000)
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) return null;
@@ -85,22 +117,45 @@ async function textOnlyReply(req) {
   }
 }
 
+function hasUnschedulablePromise(text = '') {
+  const t = String(text || '');
+  return /(?:بعطيك|أعطيك|برجع لك|أرجع لك|بسلمك|أسلمك|بجهزه لك|أجهزه لك|بأرسل لك|بارسل لك).*(?:بكرة|غد|الاثنين|الثلاثاء|الأربعاء|الاربعاء|الخميس|الجمعة|السبت|الأحد|الاحد|الساعة|يوم|الأسبوع|الاسبوع)/i.test(t);
+}
+
+function sanitizePromise(body) {
+  if (!body || typeof body !== 'object') return body;
+  const text = String(body.reply || body.text || '').trim();
+  if (!text || !hasUnschedulablePromise(text)) return body;
+  const fixed = 'ما راح أوعدك بموعد مستقبلي بدون جدولة تنفيذ فعلية. إذا تبي التقرير أو الدراسة أبدأ فيها الآن وأسلمك النتيجة هنا، وإذا ركّبنا جدولة خلفية فعلية وقتها أقدر ألتزم بموعد محدد.';
+  return { ...body, text: fixed, reply: fixed, mode: 'chat', provider: body.provider || 'dalily-guard' };
+}
+
 export default async function handler(req, res) {
+  const originalLatest = latestUserText(req);
+  const enrichedLatest = enrichContinuation(req);
+
+  if (shouldStayConversational(originalLatest)) {
+    const text = await textOnlyReply(req);
+    if (text) {
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json({ text, reply: text, mode: 'chat', provider: 'openai' });
+    }
+  }
+
   const { state, fake } = captureResponse();
   await chatHandler(req, fake);
 
   try {
-    const body = state.body;
-    const latest = latestUserText(req);
+    let body = sanitizePromise(state.body);
 
-    if (state.statusCode === 200 && body?.mode === 'action' && shouldStayConversational(latest)) {
-      console.log('Dalily question action bypassed', body?.action?.type || 'unknown');
+    if (state.statusCode === 200 && body?.mode === 'action' && shouldStayConversational(enrichedLatest)) {
+      console.log('Dalily question/continuation action bypassed', body?.action?.type || 'unknown');
       const text = await textOnlyReply(req);
       if (text) {
         res.setHeader('Cache-Control', 'no-store');
         return res.status(200).json({ text, reply: text, mode: 'chat', provider: 'openai' });
       }
-      const safe = 'هذا استفسار، مو أمر تنفيذ. وضّح لي وش تقصد وأنا أجاوبك مباشرة.';
+      const safe = 'فهمت إنك تقصد أكمل آخر طلب. ما راح أحوله لمهمة جديدة؛ بكمل من نفس السياق.';
       res.setHeader('Cache-Control', 'no-store');
       return res.status(200).json({ text: safe, reply: safe, mode: 'chat', provider: 'safe-fallback' });
     }
@@ -110,11 +165,13 @@ export default async function handler(req, res) {
       res.setHeader('Cache-Control', 'no-store');
       return res.status(200).json({ text, reply: text, mode: 'google-action', provider: 'google', action: body.action });
     }
+
+    state.body = body;
   } catch (error) {
-    console.error('Dalily Google action failure', error?.message || String(error));
+    console.error('Dalily wrapper action failure', error?.message || String(error));
     res.setHeader('Cache-Control', 'no-store');
-    const text = `ما قدرت أنفذ أمر Google الآن: ${error?.message || 'خطأ غير معروف'}`;
-    return res.status(200).json({ text, reply: text, mode: 'google-action-error', provider: 'google' });
+    const text = `ما قدرت أنفذ الطلب الآن: ${error?.message || 'خطأ غير معروف'}`;
+    return res.status(200).json({ text, reply: text, mode: 'action-error', provider: 'dalily' });
   }
 
   for (const [name, value] of Object.entries(state.headers)) res.setHeader(name, value);
